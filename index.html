@@ -131,7 +131,12 @@ body{
 @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(74,222,128,0.5);} 70%{box-shadow:0 0 0 7px rgba(74,222,128,0);} 100%{box-shadow:0 0 0 0 rgba(74,222,128,0);} }
 
 .viewfinder{ position:relative; width:100%; aspect-ratio:3/4; background:#0B1F14; overflow:hidden; }
-.viewfinder video{ width:100%; height:100%; object-fit:contain; display:block; background:#0B1F14; }
+.viewfinder video{ width:100%; height:100%; object-fit:cover; display:block; background:#0B1F14; }
+.viewfinder video.mirrored{ transform:scaleX(-1); }
+.vf-toast{ position:absolute; left:50%; bottom:112px; transform:translateX(-50%); background:rgba(11,31,20,0.92); color:#EAF5EC; font-size:11.5px; padding:8px 14px; border-radius:999px; opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:5; text-align:center; max-width:88%; }
+.vf-toast.show{ opacity:1; }
+.ctrl-btn.active{ background:var(--green-600); }
+.vf-switch-btn{ position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:50%; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; z-index:4; }
 .viewfinder .captured-img{ width:100%; height:100%; object-fit:cover; display:none; }
 .viewfinder canvas.overlay{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 .vf-frame{ position:absolute; inset:0; pointer-events:none; }
@@ -301,7 +306,7 @@ body{
 .trend-card .tc-head span{ font-size:10px; color:var(--text-mute); }
 .trend-empty{ text-align:center; padding:20px 10px; font-size:11.5px; color:var(--text-mute); }
 
-@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; } }
+@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; } .viewfinder{ aspect-ratio:auto; flex:1; min-height:0; } #screen-scan.active{ display:flex; } }
 </style>
 </head>
 <body>
@@ -377,12 +382,15 @@ body{
       <div class="vf-hint">Arahkan kamera ke makanan<br>Pastikan objek terlihat jelas</div>
       <div class="vf-error">Kamera tidak dapat diakses (izin ditolak/tidak tersedia).<br><br>Kamu tetap bisa mencari nama makanan secara manual di bawah.</div>
       <div class="detect-chip" id="detectChip"></div>
+      <button class="vf-switch-btn" id="btnSwitchCam" title="Ganti kamera"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+      <div class="vf-toast" id="vfToast"></div>
     </div>
 
     <div class="scan-controls">
-      <button class="ctrl-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
+      <button class="ctrl-btn" id="btnGallery" title="Pilih dari galeri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
       <button class="btn-capture" id="btnCapture"><div class="ring"></div></button>
-      <button class="ctrl-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
+      <button class="ctrl-btn" id="btnFlash" title="Nyalakan/matikan flash"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
+      <input type="file" id="galleryInput" accept="image/*" style="display:none;">
     </div>
 
     <div class="manual-search">
@@ -965,6 +973,7 @@ const DAMPAK = {
 
 let mediaStream=null, lastCapturedDataUrl=null, selectedFood=null, history=[];
 let cocoModel=null, detectLoopId=null, currentDetection=null;
+let currentFacing='environment', flashOn=false, torchSupported=null;
 
 /* ---------- Nav ---------- */
 function showTab(tab){
@@ -1140,23 +1149,71 @@ const arPill=document.getElementById('arPill'), arPillText=document.getElementBy
 const detectChip=document.getElementById('detectChip');
 let cameraStarted=false, modelLoadStarted=false;
 
-async function startCameraFlow(){
+function showVfToast(msg, ms=2200){
+  const t=document.getElementById('vfToast'); if(!t) return;
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(showVfToast._tid);
+  showVfToast._tid=setTimeout(()=>t.classList.remove('show'), ms);
+}
+async function startCameraFlow(facing){
   document.getElementById('capturedImgTag').style.display='none';
   video.style.display='block';
   viewfinder.classList.remove('errored');
-  if(!cameraStarted){
-    cameraStarted=true;
-    try{
-      mediaStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'environment'}, audio:false });
-      video.srcObject = mediaStream;
-    }catch(err){
-      viewfinder.classList.add('errored');
-      arPill.className='ar-pill off'; arPillText.textContent='Kamera Tidak Tersedia';
-      return;
+  if(facing) currentFacing=facing;
+  if(mediaStream){ mediaStream.getTracks().forEach(t=>t.stop()); mediaStream=null; }
+  cameraStarted=true; flashOn=false; torchSupported=null;
+  document.getElementById('btnFlash').classList.remove('active');
+  video.classList.toggle('mirrored', currentFacing==='user');
+  try{
+    mediaStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:currentFacing}, audio:false });
+    video.srcObject = mediaStream;
+  }catch(err){
+    if(currentFacing==='user' && facing){
+      showVfToast('Kamera depan tidak tersedia, kembali ke kamera belakang');
+      currentFacing='environment';
+      return startCameraFlow();
     }
+    viewfinder.classList.add('errored');
+    arPill.className='ar-pill off'; arPillText.textContent='Kamera Tidak Tersedia';
+    return;
   }
   loadCocoModel();
 }
+document.getElementById('btnSwitchCam').addEventListener('click', ()=>{
+  startCameraFlow(currentFacing==='environment' ? 'user' : 'environment');
+});
+document.getElementById('btnFlash').addEventListener('click', async ()=>{
+  if(!mediaStream){ showVfToast('Nyalakan kamera dulu'); return; }
+  const track = mediaStream.getVideoTracks()[0];
+  if(!track) return;
+  const caps = track.getCapabilities ? track.getCapabilities() : {};
+  if(!caps.torch){
+    showVfToast('Flash tidak didukung browser/perangkat ini');
+    return;
+  }
+  try{
+    flashOn=!flashOn;
+    await track.applyConstraints({ advanced:[{ torch:flashOn }] });
+    document.getElementById('btnFlash').classList.toggle('active', flashOn);
+  }catch(e){
+    flashOn=!flashOn;
+    showVfToast('Gagal mengaktifkan flash');
+  }
+});
+document.getElementById('btnGallery').addEventListener('click', ()=>{
+  document.getElementById('galleryInput').click();
+});
+document.getElementById('galleryInput').addEventListener('change', (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    lastCapturedDataUrl = reader.result;
+    goToConfirm();
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+});
 async function loadCocoModel(){
   if(cocoModel){ startDetectLoop(); return; }
   if(modelLoadStarted) return;
