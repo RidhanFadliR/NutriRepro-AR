@@ -999,9 +999,18 @@ function fitViewfinder(){
   used += Math.max(0, screenScan.children.length-1) * 14;
   vf.style.height = Math.max(240, vh-used) + 'px';
 }
-window.addEventListener('resize', fitViewfinder);
-if(window.visualViewport) window.visualViewport.addEventListener('resize', fitViewfinder);
-window.addEventListener('orientationchange', ()=> setTimeout(fitViewfinder,300));
+function fitFrame(){
+  const frame=document.querySelector('.frame');
+  if(!frame) return;
+  if(window.innerWidth>440){ frame.style.height=''; return; }
+  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  frame.style.height = vh + 'px';
+  fitViewfinder();
+}
+window.addEventListener('resize', fitFrame);
+if(window.visualViewport) window.visualViewport.addEventListener('resize', fitFrame);
+window.addEventListener('orientationchange', ()=> setTimeout(fitFrame,300));
+fitFrame();
 function goToScan(){ showTab('scan'); }
 document.querySelectorAll('.nav-btn').forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
 
