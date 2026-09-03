@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NUTRIREPRO-AR</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --bg:#F6F5EE;
+  --panel:#FFFFFF;
+  --panel-2:#F1F4EE;
+  --header:#14472C;
+  --header-2:#1C5C3A;
+  --green-900:#123D24;
+  --green-700:#1E7A4A;
+  --green-600:#2F9B5D;
+  --green-100:#E3F2E7;
+  --text:#182A20;
+  --text-mute:#6D7C72;
+  --line:#E8E5D9;
+  --orange:#E38A34;
+  --orange-bg:#FCEEDC;
+  --red:#D6584B;
+  --red-bg:#FBE7E4;
+  --amber:#D4A02F;
+  --amber-bg:#FBF1D9;
+  --green-tag:#2F9B5D;
+  --green-tag-bg:#E3F2E7;
+  --radius-lg:26px;
+  --radius-md:16px;
+  --radius-sm:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:#EDEAE0;
+  font-family:'Inter',sans-serif;
+  color:var(--text);
+  display:flex; align-items:flex-start; justify-content:center;
+  padding:26px 14px 60px;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.display{font-family:'Nunito',sans-serif;}
+
+.frame{
+  width:100%; max-width:420px; background:var(--bg);
+  border:1px solid rgba(0,0,0,0.06); border-radius:var(--radius-lg);
+  box-shadow:0 40px 70px -30px rgba(20,40,25,0.4);
+  overflow:hidden; display:flex; flex-direction:column; height:820px; max-height:100vh; position:relative;
+}
+
+/* header */
+.app-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px 16px; }
+.brand{ display:flex; align-items:center; gap:10px; }
+.brand .logo{ width:38px; height:38px; border-radius:11px; background:var(--green-100); display:flex; align-items:center; justify-content:center; }
+.brand .name{ font-family:'Nunito',sans-serif; font-weight:800; font-size:19px; color:var(--green-900); line-height:1.1; }
+.brand .tag{ font-size:10.5px; color:var(--text-mute); margin-top:1px; }
+
+/* scan screen header bar (green) */
+.topbar-green{
+  background:linear-gradient(180deg,var(--header) 0%, var(--header-2) 100%);
+  color:#fff; padding:14px 16px 14px; display:flex; align-items:center; justify-content:space-between;
+}
+.topbar-green .tb-title{ font-family:'Nunito',sans-serif; font-weight:700; font-size:16px; }
+.topbar-green .tb-btn{ width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; }
+.topbar-green .tb-btn svg{ display:block; }
+
+.app-body{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 18px 14px; display:flex; flex-direction:column; gap:14px; }
+.app-body > *{ flex-shrink:0; }
+#wrap-home{ height:100%; display:flex; flex-direction:column; overflow:hidden; }
+.screen{ height:100%; overflow-y:auto; }
+.app-body.tight{ padding:0; }
+.screen{ display:none; flex-direction:column; gap:14px; animation:fadeIn .3s ease; }
+.screen.active{ display:flex; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+/* ---- Home ---- */
+.greet-card{
+  background:linear-gradient(135deg,var(--header) 0%, var(--header-2) 100%);
+  border-radius:var(--radius-md); padding:18px 18px 20px; color:#fff;
+}
+.greet-card .g-hello{ font-family:'Nunito',sans-serif; font-weight:800; font-size:17px; }
+.greet-card .g-sub{ font-size:12.5px; opacity:0.85; margin-top:3px; }
+
+.summary-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:16px; display:flex; gap:16px; align-items:center;
+}
+.summary-card h4{ margin:0 0 4px; font-size:13px; font-weight:700; }
+.summary-card p{ margin:0; font-size:11.5px; color:var(--text-mute); line-height:1.5; }
+
+.ring-wrap{ position:relative; width:78px; height:78px; flex-shrink:0; }
+.ring-wrap svg{ transform:rotate(-90deg); }
+.ring-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-center .rv{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:16px; }
+.ring-center .rl{ font-size:8px; color:var(--text-mute); }
+
+.scan-cta{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); padding:16px; display:flex; gap:14px; align-items:center; }
+.scan-cta .sc-icon{ width:52px; height:52px; border-radius:14px; background:var(--green-100); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.scan-cta h4{ margin:0 0 4px; font-size:13.5px; font-weight:700; }
+.scan-cta p{ margin:0 0 10px; font-size:11.5px; color:var(--text-mute); line-height:1.5; }
+.btn{ border:none; cursor:pointer; font-family:'Inter',sans-serif; font-weight:700; border-radius:999px; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s ease, opacity .12s ease; }
+.btn:active{ transform:scale(0.97); }
+.btn:disabled{ opacity:0.4; cursor:not-allowed; }
+.btn-primary{ background:var(--green-700); color:#fff; padding:11px 18px; font-size:13px; }
+.btn-block{ width:100%; padding:13px 18px; font-size:13.5px; }
+.btn-ghost{ background:var(--panel); color:var(--text); border:1px solid var(--line); padding:11px 18px; font-size:13px; }
+
+.section-title{ display:flex; align-items:center; justify-content:space-between; margin-top:4px; }
+.section-title h3{ margin:0; font-size:14px; font-weight:700; font-family:'Nunito',sans-serif; }
+.section-title span{ font-size:11.5px; color:var(--green-700); font-weight:600; cursor:pointer; }
+
+.mini-history{ display:flex; gap:12px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px; cursor:pointer; }
+.mini-history img{ width:48px; height:48px; border-radius:10px; object-fit:cover; background:var(--panel-2); flex-shrink:0; }
+.mini-history .mh-name{ font-size:12.5px; font-weight:700; }
+.mini-history .mh-time{ font-size:10px; color:var(--text-mute); margin-top:2px; }
+
+.quick-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.quick-item{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 12px; display:flex; flex-direction:column; gap:8px; cursor:pointer; }
+.quick-item .qi-icon{ width:34px; height:34px; border-radius:10px; background:var(--green-100); display:flex; align-items:center; justify-content:center; }
+.quick-item span{ font-size:12px; font-weight:700; line-height:1.25; }
+
+/* ---- Scan screen ---- */
+.ar-pill{ display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:#B6F0C8; }
+.ar-pill .dot{ width:7px; height:7px; border-radius:50%; background:#4ADE80; box-shadow:0 0 0 0 rgba(74,222,128,0.6); animation:pulse 1.8s infinite; }
+.ar-pill.loading .dot{ background:#E3B34A; animation:none; }
+.ar-pill.off .dot{ background:#9CA3A0; animation:none; }
+@keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(74,222,128,0.5);} 70%{box-shadow:0 0 0 7px rgba(74,222,128,0);} 100%{box-shadow:0 0 0 0 rgba(74,222,128,0);} }
+
+.viewfinder{ position:relative; width:100%; aspect-ratio:3/4; background:#0B1F14; overflow:hidden; }
+.viewfinder video{ width:100%; height:100%; object-fit:contain; display:block; background:#0B1F14; }
+.viewfinder .captured-img{ width:100%; height:100%; object-fit:cover; display:none; }
+.viewfinder canvas.overlay{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.vf-frame{ position:absolute; inset:0; pointer-events:none; }
+.corner{ position:absolute; width:26px; height:26px; border:3px solid #6FE3A0; opacity:0.9; }
+.corner.tl{ top:16px; left:16px; border-right:none; border-bottom:none; border-radius:8px 0 0 0; }
+.corner.tr{ top:16px; right:16px; border-left:none; border-bottom:none; border-radius:0 8px 0 0; }
+.corner.bl{ bottom:90px; left:16px; border-right:none; border-top:none; border-radius:0 0 0 8px; }
+.corner.br{ bottom:90px; right:16px; border-left:none; border-top:none; border-radius:0 0 8px 0; }
+.vf-hint{ position:absolute; bottom:100px; left:0; right:0; text-align:center; font-size:11.5px; color:#EAF5EC; text-shadow:0 1px 4px rgba(0,0,0,0.5); line-height:1.5; }
+.vf-error{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; text-align:center; padding:26px; font-size:12.5px; color:#EAF5EC; line-height:1.6; background:rgba(11,31,20,0.92); }
+.viewfinder.errored .vf-error{ display:flex; } .viewfinder.errored video{ display:none; }
+.detect-chip{
+  position:absolute; left:14px; right:14px; bottom:22px; display:none;
+  background:rgba(20,71,44,0.92); color:#fff; border:1px solid rgba(111,227,160,0.5);
+  border-radius:999px; padding:10px 16px; font-size:12.5px; font-weight:600;
+  align-items:center; justify-content:center; gap:8px; cursor:pointer;
+}
+.detect-chip.show{ display:flex; animation:fadeIn .2s ease; }
+
+.scan-controls{ display:flex; align-items:center; justify-content:space-between; padding:16px 22px; background:var(--header); }
+.ctrl-btn{ width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.14); border:none; display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; }
+.btn-capture{ width:66px; height:66px; border-radius:50%; background:#fff; border:4px solid rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.btn-capture .ring{ width:52px; height:52px; border-radius:50%; background:#fff; border:2px solid var(--header); }
+
+.manual-search{ padding:14px 18px 4px; }
+.search-input{ width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:var(--radius-sm); padding:12px 14px; font-size:13.5px; }
+.search-input:focus{ outline:none; border-color:var(--green-600); }
+.suggest-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:200px; overflow-y:auto; }
+.suggest-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 13px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:pointer; }
+.suggest-item:hover{ border-color:var(--green-600); }
+.si-name{ font-size:13px; font-weight:600; }
+.si-tag{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.4px; padding:3px 8px; border-radius:999px; font-weight:700; }
+.tag-ekstrem{ background:var(--red-bg); color:var(--red); }
+.tag-tinggi{ background:var(--orange-bg); color:var(--orange); }
+.tag-sedang{ background:var(--amber-bg); color:var(--amber); }
+.tag-rendah{ background:var(--green-tag-bg); color:var(--green-tag); }
+
+.disclaimer{ display:flex; gap:9px; padding:12px 13px; background:var(--amber-bg); border:1px solid #EBD79A; border-radius:var(--radius-sm); font-size:11px; line-height:1.55; color:#7A5F1E; margin:14px 18px; }
+.disclaimer b{ color:#5C4711; }
+
+/* ---- Confirm ---- */
+.confirm-photo{ width:100%; aspect-ratio:3/4; border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--line); background:var(--panel-2); }
+.confirm-photo img{ width:100%; height:100%; object-fit:cover; }
+.selected-food{ display:flex; align-items:center; justify-content:space-between; padding:13px 15px; background:var(--green-100); border:1px solid var(--green-600); border-radius:var(--radius-sm); }
+.selected-food .sf-name{ font-family:'Nunito',sans-serif; font-weight:700; font-size:14.5px; }
+
+/* ---- Result ---- */
+.result-card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
+.result-top{ display:flex; gap:12px; padding:14px; border-bottom:1px solid var(--line); }
+.result-top img{ width:56px; height:56px; border-radius:12px; object-fit:cover; background:var(--panel-2); flex-shrink:0; }
+.result-top .rt-name{ font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; }
+.result-top .rt-time{ font-size:10.5px; color:var(--text-mute); margin-top:2px; }
+
+.risk-band{ margin:14px; padding:14px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:space-between; }
+.risk-band.b-ekstrem{ background:var(--red-bg); } .risk-band.b-tinggi{ background:var(--orange-bg); }
+.risk-band.b-sedang{ background:var(--amber-bg); } .risk-band.b-rendah{ background:var(--green-tag-bg); }
+.risk-band .rb-label{ font-size:11px; color:var(--text-mute); margin-bottom:3px; }
+.risk-band .rb-value{ font-family:'Nunito',sans-serif; font-weight:800; font-size:16px; }
+.risk-band.b-ekstrem .rb-value{ color:var(--red);} .risk-band.b-tinggi .rb-value{ color:var(--orange);}
+.risk-band.b-sedang .rb-value{ color:var(--amber);} .risk-band.b-rendah .rb-value{ color:var(--green-tag);}
+
+.nutri-table{ padding:0 14px 14px; }
+.nutri-table .nt-title{ display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; font-size:12.5px; font-weight:700; }
+.nutri-table .nt-title span{ font-size:10px; color:var(--text-mute); font-weight:500; }
+.nt-row{ display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line); font-size:12.5px; }
+.nt-row .nt-name{ color:var(--text-mute); }
+.nt-row .nt-val{ font-family:'IBM Plex Mono',monospace; font-weight:600; }
+.nt-row .nt-right{ display:flex; align-items:center; gap:8px; }
+
+.btn-full-green{ margin:4px 14px 14px; }
+
+.tabs{ display:flex; gap:8px; background:var(--panel-2); padding:4px; border-radius:999px; }
+.tab-btn{ flex:1; background:none; border:none; padding:9px 6px; border-radius:999px; font-size:11.5px; font-weight:700; color:var(--text-mute); cursor:pointer; }
+.tab-btn.active{ background:var(--green-700); color:#fff; }
+.tab-panel{ display:none; }
+.tab-panel.active{ display:block; }
+
+.info-block{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); padding:15px 16px; }
+.info-block h4{ margin:0 0 8px; font-family:'Nunito',sans-serif; font-size:13.5px; font-weight:800; }
+.info-block ul{ margin:0; padding-left:18px; }
+.info-block li{ font-size:12.5px; line-height:1.6; color:var(--text); margin-bottom:4px; }
+.info-block p{ margin:0; font-size:12.5px; line-height:1.65; color:var(--text); }
+.info-block.rec{ background:var(--green-100); border-color:#BFE4CC; }
+.info-block.rec h4{ color:var(--green-700); }
+
+/* ---- History ---- */
+.history-item{ display:flex; align-items:center; gap:12px; padding:12px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:pointer; }
+.history-item img{ width:46px; height:46px; border-radius:11px; object-fit:cover; background:var(--panel-2); flex-shrink:0; }
+.history-item .hi-name{ font-size:13px; font-weight:700; }
+.history-item .hi-time{ font-size:10.5px; color:var(--text-mute); margin-top:2px; }
+.empty-state{ text-align:center; padding:60px 20px; color:var(--text-mute); }
+.empty-state p{ font-size:12.5px; line-height:1.6; margin:10px 0 0; }
+
+/* ---- Edukasi ---- */
+.accordion{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); overflow:hidden; }
+.acc-head{ display:flex; justify-content:space-between; align-items:center; padding:14px; cursor:pointer; }
+.acc-head span{ font-size:13px; font-weight:700; }
+.acc-body{ display:none; padding:0 14px 14px; font-size:12.5px; color:var(--text-mute); line-height:1.6; }
+.accordion.open .acc-body{ display:block; }
+.accordion.open .acc-chev{ transform:rotate(180deg); }
+.acc-chev{ transition:transform .2s ease; }
+
+/* bottom nav */
+.bottom-nav{ display:flex; border-top:1px solid var(--line); background:var(--panel); }
+.nav-btn{ flex:1; background:none; border:none; cursor:pointer; padding:10px 4px 12px; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--text-mute); font-size:10px; font-weight:600; }
+.nav-btn.active{ color:var(--green-700); }
+.article-card{ display:block; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px; text-decoration:none; color:var(--text); }
+.ac-tag{ display:inline-block; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--green-700); background:var(--green-100); padding:3px 8px; border-radius:999px; margin-bottom:8px; }
+.article-card h4{ font-family:'Nunito',sans-serif; font-size:13.5px; font-weight:800; margin:0 0 6px; color:var(--green-900); line-height:1.3; }
+.article-card p{ font-size:11.5px; color:var(--text-mute); line-height:1.55; margin:0 0 10px; }
+.article-card .ac-link{ font-size:11px; font-weight:700; color:var(--green-700); }
+.article-card:hover{ border-color:var(--green-600); }
+
+/* ---- Artikel: pencarian & pengelompokan referensi ---- */
+.filter-chip-row{ display:flex; gap:8px; overflow-x:auto; padding:2px 2px 6px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.filter-chip-row::-webkit-scrollbar{ display:none; }
+.filter-chip{ flex-shrink:0; background:var(--panel); border:1px solid var(--line); color:var(--text-mute); font-size:11.5px; font-weight:700; padding:8px 14px; border-radius:999px; cursor:pointer; white-space:nowrap; font-family:'Inter',sans-serif; }
+.filter-chip.active{ background:var(--green-700); border-color:var(--green-700); color:#fff; }
+.artikel-group-title{ display:flex; align-items:baseline; gap:6px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-mute); margin:12px 2px 2px; }
+.artikel-group-title .agt-count{ font-size:10px; font-weight:600; text-transform:none; letter-spacing:0; color:var(--text-mute); opacity:0.75; }
+.artikel-group{ display:flex; flex-direction:column; gap:10px; }
+.artikel-empty{ text-align:center; padding:36px 18px; color:var(--text-mute); font-size:12.5px; line-height:1.65; }
+.artikel-result-count{ font-size:11px; color:var(--text-mute); margin:0 2px; }
+.acc-refs{ font-size:11.5px; font-weight:700; color:var(--green-700); cursor:pointer; display:inline-flex; align-items:center; gap:4px; margin-top:8px; }
+.acc-refs:hover{ text-decoration:underline; }
+
+/* ---- Visual Vaskular (SVG, zoomable) ---- */
+.vasc-canvas-wrap{ width:100%; position:relative; background:linear-gradient(180deg,#F6F5EE,#EDEAE0); border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; touch-action:none; flex-shrink:0; }
+.vasc-canvas-wrap::before{ content:""; display:block; padding-top:61%; }
+.vasc-zoom-stage{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; cursor:grab; overflow:hidden; }
+.vasc-zoom-stage.dragging{ cursor:grabbing; }
+.vasc-zoom-stage svg{ width:100%; height:100%; transform-origin:50% 50%; will-change:transform; touch-action:none; }
+.vasc-hint{ position:absolute; top:8px; left:10px; font-size:9.5px; color:var(--text-mute); background:rgba(255,255,255,0.8); padding:3px 8px; border-radius:999px; pointer-events:none; }
+.vasc-stage-badge{ position:absolute; top:8px; right:10px; font-size:10px; font-weight:700; padding:4px 10px; border-radius:999px; color:#fff; }
+.vasc-zoom-controls{ position:absolute; bottom:10px; right:10px; display:flex; flex-direction:column; gap:6px; z-index:5; }
+.vasc-zoom-btn{ width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.92); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; line-height:1; cursor:pointer; color:var(--green-900); box-shadow:0 2px 8px rgba(20,40,25,0.18); user-select:none; }
+.vasc-zoom-btn:active{ transform:scale(0.94); }
+.vasc-zoom-pct{ position:absolute; bottom:10px; left:10px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--text-mute); background:rgba(255,255,255,0.8); padding:3px 8px; border-radius:999px; pointer-events:none; }
+.slider-card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); padding:14px 16px; }
+.slider-card .sc-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+.slider-card .sc-head h4{ margin:0; font-size:13px; font-weight:700; }
+.slider-card .sc-head span{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700; color:var(--green-700); }
+.range-slider{ -webkit-appearance:none; width:100%; height:6px; border-radius:999px; background:linear-gradient(90deg,var(--green-600),var(--amber),var(--red)); outline:none; }
+.range-slider::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:3px solid var(--green-900); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.25); }
+.range-slider::-moz-range-thumb{ width:20px; height:20px; border-radius:50%; background:#fff; border:3px solid var(--green-900); cursor:pointer; }
+.range-labels{ display:flex; justify-content:space-between; font-size:10px; color:var(--text-mute); margin-top:4px; }
+.vasc-legend{ display:flex; flex-direction:column; gap:6px; }
+.vasc-legend-item{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--text-mute); }
+.vasc-legend-item .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+/* ---- Nutri-Switch popup ---- */
+.modal-overlay{ position:absolute; inset:0; background:rgba(18,40,25,0.55); display:none; align-items:flex-end; justify-content:center; z-index:50; }
+.modal-overlay.show{ display:flex; animation:fadeIn .2s ease; }
+.modal-card{ width:100%; max-height:82%; overflow-y:auto; background:var(--bg); border-radius:22px 22px 0 0; padding:20px 20px 24px; }
+.modal-card .mc-badge{ display:inline-flex; align-items:center; gap:6px; background:var(--red-bg); color:var(--red); font-size:11px; font-weight:700; padding:5px 12px; border-radius:999px; margin-bottom:10px; }
+.modal-card h3{ margin:0 0 6px; font-family:'Nunito',sans-serif; font-size:17px; }
+.modal-card > p{ margin:0 0 14px; font-size:12.5px; color:var(--text-mute); line-height:1.6; }
+.switch-item{ display:flex; gap:12px; align-items:flex-start; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 13px; margin-bottom:8px; }
+.switch-item .si-icon{ width:36px; height:36px; border-radius:10px; background:var(--green-100); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.switch-item .si-title{ font-size:12.5px; font-weight:700; }
+.switch-item .si-desc{ font-size:11px; color:var(--text-mute); margin-top:2px; line-height:1.5; }
+
+/* ---- Trend chart ---- */
+.trend-card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-md); padding:14px 16px; }
+.trend-card .tc-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.trend-card .tc-head h4{ margin:0; font-size:13px; font-weight:700; }
+.trend-card .tc-head span{ font-size:10px; color:var(--text-mute); }
+.trend-empty{ text-align:center; padding:20px 10px; font-size:11.5px; color:var(--text-mute); }
+
+@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; } }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- ============ HOME ============ -->
+  <div id="wrap-home">
+    <div class="app-header">
+      <div class="brand">
+        <div class="logo">
+        <img src="logo1.png" alt="Repronutri" style="width:100%;height:100%;object-fit:cover;border-radius:11px;">
+        </div>
+        <div><div class="name">NutriRepro-AR</div><div class="tag">Nutrisi tepat, reproduksi sehat.</div></div>
+      </div>
+    </div>
+
+    <div class="app-body" id="homeBody">
+      <div class="greet-card">
+        <div class="g-hello">Halo! &#128075;</div>
+        <div class="g-sub">Ayo cek makananmu hari ini!</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="ring-wrap">
+          <svg width="78" height="78" viewBox="0 0 78 78">
+            <circle cx="39" cy="39" r="33" fill="none" stroke="#E8E5D9" stroke-width="8"/>
+            <circle id="homeRing" cx="39" cy="39" r="33" fill="none" stroke="#2F9B5D" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 207.3"/>
+          </svg>
+          <div class="ring-center"><div class="rv mono" id="homeRingVal">&mdash;</div><div class="rl">skor</div></div>
+        </div>
+        <div>
+          <h4 id="homeScoreLabel">Belum Ada Data</h4>
+          <p id="homeScoreDesc">Scan makananmu untuk mulai melihat ringkasan pola makan harian di sini.</p>
+        </div>
+      </div>
+
+      <div class="scan-cta">
+        <div class="sc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></div>
+        <div style="flex:1;">
+          <h4>Scan Makanan</h4>
+          <p>Arahkan kamera ke makanan untuk melihat estimasi kandungan &amp; dampaknya bagi kesehatan reproduksi.</p>
+          <button class="btn btn-primary" onclick="goToScan()">Scan Sekarang</button>
+        </div>
+      </div>
+
+      <div class="section-title"><h3>Riwayat Scan</h3><span onclick="showTab('history')">Lihat semua &rsaquo;</span></div>
+      <div id="homeRecent"></div>
+
+      <div class="section-title"><h3>Layanan NutriRepro-AR</h3></div>
+      <div class="quick-grid">
+        <div class="quick-item" onclick="showTab('edu')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><span>Edukasi Reproduksi</span></div>
+        <div class="quick-item" onclick="showTab('scan')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M12 2C7 2 4 6 4 10c0 5 4 9 8 12 4-3 8-7 8-12 0-4-3-8-8-8Z"/></svg></div><span>Rekomendasi Makanan</span></div>
+        <div class="quick-item" onclick="showTab('artikel')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><span>Artikel Ilmiah</span></div>
+        <div class="quick-item" onclick="showTab('history')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 4 5-8"/></svg></div><span>Grafik Tren Riwayat</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCAN ============ -->
+  <div class="screen" id="screen-scan">
+    <div class="topbar-green">
+      <button class="tb-btn" onclick="showTab('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+      <div class="tb-title">Scan Makanan</div>
+      <button class="tb-btn" onclick="document.getElementById('scanTipsOverlay').classList.add('show')">&#9432;</button>
+    </div>
+    <div style="padding:8px 18px 0;"><div class="ar-pill loading" id="arPill"><span class="dot"></span><span id="arPillText">Memuat AR&hellip;</span></div></div>
+
+    <div class="viewfinder" id="viewfinder">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas class="overlay" id="overlayCanvas"></canvas>
+      <img class="captured-img" id="capturedImgTag" alt="">
+      <div class="vf-frame"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div></div>
+      <div class="vf-hint">Arahkan kamera ke makanan<br>Pastikan objek terlihat jelas</div>
+      <div class="vf-error">Kamera tidak dapat diakses (izin ditolak/tidak tersedia).<br><br>Kamu tetap bisa mencari nama makanan secara manual di bawah.</div>
+      <div class="detect-chip" id="detectChip"></div>
+    </div>
+
+    <div class="scan-controls">
+      <button class="ctrl-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
+      <button class="btn-capture" id="btnCapture"><div class="ring"></div></button>
+      <button class="ctrl-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
+    </div>
+
+    <div class="manual-search">
+      <div class="section-title" style="margin-top:0;"><h3 style="font-size:12.5px;color:var(--text-mute);">Atau cari nama makanan</h3></div>
+      <input type="text" class="search-input" id="searchInput" placeholder="Ketik nama makanan&hellip;">
+      <div class="suggest-list" id="suggestList"></div>
+    </div>
+    <div class="disclaimer"><b>Mode AR terbatas:</b> deteksi otomatis hanya mengenali beberapa kategori objek umum (mis. pizza, donat, sandwich, buah, sayur). Untuk makanan lain, gunakan pencarian manual untuk konfirmasi sebelum dianalisis.</div>
+  </div>
+
+  <!-- ============ CONFIRM ============ -->
+  <div class="screen" id="screen-confirm">
+    <div class="topbar-green">
+      <button class="tb-btn" onclick="showTab('scan')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+      <div class="tb-title">Konfirmasi Makanan</div><div style="width:32px;"></div>
+    </div>
+    <div class="app-body">
+      <div class="confirm-photo"><img id="confirmImg" alt=""></div>
+      <input type="text" class="search-input" id="searchInput2" placeholder="Cari &amp; pilih nama makanan yang difoto&hellip;">
+      <div class="suggest-list" id="suggestList2"></div>
+      <div id="selectedFoodBox" style="display:none;">
+        <div class="selected-food"><span class="sf-name" id="selectedFoodName"></span><span class="mono" style="font-size:11px;color:var(--green-700);">terpilih &#10003;</span></div>
+      </div>
+      <button class="btn btn-primary btn-block" id="btnAnalyze" disabled>Analisis Makanan</button>
+      <button class="btn btn-ghost btn-block" onclick="showTab('scan')">Foto Ulang</button>
+    </div>
+  </div>
+
+  <!-- ============ RESULT ============ -->
+  <div class="screen" id="screen-result">
+    <div class="topbar-green">
+      <button class="tb-btn" onclick="showTab('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button>
+      <div class="tb-title">Hasil Analisis</div>
+      <button class="tb-btn">&#8599;</button>
+    </div>
+    <div class="app-body">
+      <div class="result-card">
+        <div class="result-top">
+          <img id="resultThumb" alt="">
+          <div><div class="rt-name" id="resultName">&mdash;</div><div class="rt-time" id="resultTime">&mdash;</div></div>
+        </div>
+        <div class="risk-band" id="riskBand">
+          <div><div class="rb-label">Tingkat Risiko Reproduksi</div><div class="rb-value" id="riskLabelText">&mdash;</div></div>
+          <div class="ring-wrap" style="width:56px;height:56px;">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <circle cx="28" cy="28" r="23" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="7"/>
+              <circle id="resultRing" cx="28" cy="28" r="23" fill="none" stroke-width="7" stroke-linecap="round" stroke-dasharray="0 144.5"/>
+            </svg>
+            <div class="ring-center" style="inset:0;"><div class="rv mono" id="resultRingVal" style="font-size:12px;">&mdash;</div></div>
+          </div>
+        </div>
+        <div class="nutri-table">
+          <div class="nt-title">Kandungan Nutrisi <span>Estimasi rata-rata/porsi</span></div>
+          <div id="nutriRows"></div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-panel="ringkasan">Ringkasan</button>
+        <button class="tab-btn" data-panel="dampak">Dampak Reproduksi</button>
+        <button class="tab-btn" data-panel="referensi">Referensi</button>
+      </div>
+
+      <div class="tab-panel active" id="panel-ringkasan">
+        <div class="info-block" style="margin-bottom:12px;">
+          <h4>Mengapa makanan ini perlu diperhatikan?</h4>
+          <p id="resultMechanism">&mdash;</p>
+        </div>
+        <div class="info-block rec"><h4>Rekomendasi Alternatif Sehat</h4><p id="resultAlt">&mdash;</p></div>
+        <button class="btn btn-ghost btn-block" onclick="goToVascularFromResult()">Lihat Simulasi Pembuluh Darah &#8594;</button>
+      </div>
+
+      <div class="tab-panel" id="panel-dampak">
+        <div class="tabs" style="margin-bottom:12px;">
+          <button class="tab-btn active" data-sub="wanita">Wanita</button>
+          <button class="tab-btn" data-sub="pria">Pria</button>
+        </div>
+        <div id="dampakContent"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-referensi">
+        <div class="info-block"><h4>Sumber Acuan Umum</h4>
+          <ul>
+            <li>Kemenkes RI &mdash; Pedoman Gizi Seimbang</li>
+            <li>WHO &mdash; Reproductive Health &amp; Nutrition Guidance</li>
+            <li>American Society for Reproductive Medicine (ASRM) &mdash; materi edukasi gizi &amp; kesuburan</li>
+          </ul>
+          <p style="margin-top:8px;">Konten ini merupakan ringkasan edukatif atas tema yang umum dibahas pada sumber-sumber di atas, bukan kutipan studi tunggal dengan angka klinis presisi.</p>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-block" onclick="showTab('scan')">Scan Makanan Lain</button>
+    </div>
+  </div>
+
+  <!-- ============ HISTORY ============ -->
+  <div class="screen" id="screen-history">
+    <div class="topbar-green"><button class="tb-btn" onclick="showTab('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><div class="tb-title">Riwayat</div><div style="width:32px;"></div></div>
+    <div class="app-body">
+      <div class="trend-card">
+        <div class="tc-head"><h4>Tren Kesehatan Vaskulo-Reproduksi</h4><span>30 hari terakhir</span></div>
+        <div id="trendChartWrap"></div>
+      </div>
+      <div class="section-title" style="margin-top:2px;"><h3 style="font-size:12.5px;color:var(--text-mute);">Log makanan bulan ini</h3><span id="historyCount"></span></div>
+      <div id="historyList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <div class="empty-state" id="historyEmpty">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6D7C72" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <p>Belum ada riwayat scan.<br>Hasil pemindaianmu akan muncul di sini.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ EDUKASI ============ -->
+  <div class="screen" id="screen-edu">
+    <div class="topbar-green"><button class="tb-btn" onclick="showTab('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><div class="tb-title">Edukasi Reproduksi</div><div style="width:32px;"></div></div>
+    <div class="app-body">
+      <div class="section-title" style="margin-top:0;"><h3>Aliran Darah ke Organ Urologi &amp; Reproduksi</h3></div>
+      <div class="vasc-canvas-wrap" id="vascCanvasWrap">
+        <div class="vasc-zoom-stage" id="vascZoomStage">
+          <svg id="vascSvg" viewBox="0 0 580 360" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id="imgClip"><rect x="0" y="4" width="580" height="343" rx="10"/></clipPath>
+            </defs>
+
+            <!-- ===== Foto referensi anatomi (organ reproduksi wanita & pria) ===== -->
+            <image href="data:image/jpeg;base64,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8888888888888888888888888888888888888888888888w8888880888888888888884ww888888888888SQ2815s38888888888884DWmwaV888888888l4sinXIOb08888VKCW88wPTx6HJ3d8809Pw88hqWX6UCxfy8888zCl0VzkwCjJ2Hl5ztQ0P2J85+NKQXOopc8888TdO6yvZFXSW6f2Zvy+ek3i8u8q+bB08s28888+B4dyeT0nmqzfNXaH39aCc4q88Pd0A8p+8888LplzL+IscHqef8ATLKuXqifPP8AzzF+YXyjvzzzzzyz73zzwOLeJWTzx++6zzyAfzwvTH3zy7zzzzzzzzzzzzFZMNfzzzzzzzzxOnzwvbGHzzLzzzzzzzzzzzwG5XXbzzzzzzzzwfTzzvHePzySLzzzzzzzzzzwGgmIrTzzzzzzzh5JviZKOHTd3/zzzzzzzzzzwL9x6/zzzzzzzzguJ64Hj5ruhj7zzzzzzzzzzxwrFWjzzzzzzzzj2cQLWyNMwfF/zzzzzzzzzzzw+uAbzzzzzzzzy6oSeYkDXuW0fzzzzzzzzzzzxkz6XzzzzzzzzwnYbxeRYg659zzzzzzzzzzzzzC5Grzzzzzzzzzwzzw+ihryxzzzzzzzzzzzzzzNWsrzzzzzzzzzzzzwfHQ/zzzzzzzzzzzzzzzz0203zzzzzzzzzzzzyz1zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz//EAC8RAAEEAAQFAwMDBQAAAAAAAAEAAgMREBIhMQQgMDJBEyJRFGFxQGCBIzNCQ1L/2gAIAQIBAT8A/cbnuEob4wJA3Kzt+Vmb84wOL2knrPla1O4hx20XrP8AlCZ48pvEA9yBB26RNaqVx0kA2T5nO225Guc3Yr6g5aO6h9jQw780koZovXemz/8AQQIO3JLPftYgD5VKgqCr4TJHRlMeHixyPnDdAvXemT2adi/Uhq4gf0yAmkg0qBRFIC0dAoxbwntsJpsA8r9XFRRBwso8ONwVT4ymTg6O3WdtXalmL/a3ZAVyUqRFpjjGbCY8PFhPkDUXPk0TYCe5eiz4ThRpNNtGH+z+EQCKKdHkNYEYwQ65jhF21yzCnqOTJodkHh2yv5UsVajZeney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" x="0" y="4" width="580" height="343" clip-path="url(#imgClip)" preserveAspectRatio="xMidYMid meet"/>
+
+            <!-- ===== Overlay pembuluh darah interaktif (mengikuti slider fast food) ===== -->
+            <!-- batang suplai utama dari atas, bercabang ke sistem wanita (kiri) & pria (kanan) -->
+            <path id="vesselTrunk" d="M290 8 L290 42"
+              fill="none" stroke="#D6584B" stroke-width="9" stroke-linecap="round"/>
+
+            <!-- cabang wanita: menuju rahim & ovarium -->
+            <path id="vesselFemaleMain" d="M290 42 C235 55 190 58 152 82 C150 130 150 175 150 215 C150 250 150 275 150 300"
+              fill="none" stroke="#D6584B" stroke-width="7" stroke-linecap="round"/>
+            <path id="vesselFemaleLeft" d="M152 88 C122 82 92 92 68 116"
+              fill="none" stroke="#D6584B" stroke-width="5" stroke-linecap="round"/>
+            <path id="vesselFemaleRight" d="M152 88 C182 82 214 92 252 114"
+              fill="none" stroke="#D6584B" stroke-width="5" stroke-linecap="round"/>
+
+            <!-- cabang pria: menuju prostat & testis -->
+            <path id="vesselMaleMain" d="M290 42 C345 55 405 55 442 75 C452 92 458 112 460 138 C460 170 460 205 460 235"
+              fill="none" stroke="#D6584B" stroke-width="7" stroke-linecap="round"/>
+            <path id="vesselMaleLeft" d="M450 150 C432 165 417 190 414 216"
+              fill="none" stroke="#D6584B" stroke-width="5" stroke-linecap="round"/>
+            <path id="vesselMaleRight" d="M472 150 C489 165 503 190 505 213"
+              fill="none" stroke="#D6584B" stroke-width="5" stroke-linecap="round"/>
+
+            <!-- jaringan mikrosirkulasi (kapiler) -- memudar saat aliran terhambat -->
+            <g id="capillaryNetF" stroke="#E3897A" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="1">
+              <path d="M150 220 C130 226 112 236 100 250"/>
+              <path d="M150 220 C168 228 182 240 190 254"/>
+              <path d="M150 250 C136 258 126 268 118 280"/>
+              <path d="M150 250 C164 258 174 268 182 280"/>
+            </g>
+            <g id="capillaryNetM" stroke="#E3897A" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="1">
+              <path d="M460 165 C444 172 432 182 424 196"/>
+              <path d="M460 165 C476 172 488 182 496 196"/>
+              <path d="M414 216 C406 224 401 234 398 244"/>
+              <path d="M505 213 C513 221 518 231 521 241"/>
+            </g>
+
+            <!-- plak lemak: muncul & membesar bertahap di sepanjang pembuluh -->
+            <g id="plaqueGroup">
+              <ellipse class="plaque-blob" data-id="1" cx="150" cy="150" rx="3.5" ry="7" fill="#D4A02F" opacity="0"/>
+              <ellipse class="plaque-blob" data-id="2" cx="105" cy="98" rx="3.5" ry="6.5" fill="#C48A2A" opacity="0"/>
+              <ellipse class="plaque-blob" data-id="3" cx="215" cy="98" rx="3.5" ry="6.5" fill="#D4A02F" opacity="0"/>
+              <ellipse class="plaque-blob" data-id="4" cx="460" cy="110" rx="3.5" ry="7" fill="#C48A2A" opacity="0"/>
+              <ellipse class="plaque-blob" data-id="5" cx="428" cy="182" rx="3.5" ry="6.5" fill="#D4A02F" opacity="0"/>
+              <ellipse class="plaque-blob" data-id="6" cx="492" cy="178" rx="3.5" ry="6.5" fill="#C48A2A" opacity="0"/>
+            </g>
+
+            <!-- sumbatan vaskular (muncul pada persentase tinggi) -->
+            <circle class="clot-blob" id="clotBlobF" cx="150" cy="185" r="0" fill="#7A2E22" opacity="0"/>
+            <circle class="clot-blob" id="clotBlobM" cx="460" cy="200" r="0" fill="#7A2E22" opacity="0"/>
+
+            <!-- overlay perfusi organ: organ tampak meredup/kekurangan darah saat pembuluh menyempit -->
+            <g id="perfOverlay" fill="#5A2E22">
+              <ellipse id="perfUterus" cx="150" cy="150" rx="55" ry="78" opacity="0"/>
+              <ellipse id="perfOvaryL" cx="65" cy="118" rx="17" ry="13" opacity="0"/>
+              <ellipse id="perfOvaryR" cx="255" cy="115" rx="17" ry="13" opacity="0"/>
+              <ellipse id="perfProstate" cx="460" cy="138" rx="24" ry="28" opacity="0"/>
+              <ellipse id="perfTestisL" cx="415" cy="222" rx="18" ry="16" opacity="0"/>
+              <ellipse id="perfTestisR" cx="505" cy="217" rx="18" ry="16" opacity="0"/>
+            </g>
+
+            <!-- partikel aliran darah: satu rangkaian menuju sistem wanita, satu menuju sistem pria -->
+            <g id="flowDotsF" fill="#FF8A73">
+              <circle r="2.3" cx="290" cy="10"/>
+              <circle r="2.3" cx="290" cy="10"/>
+              <circle r="2" cx="290" cy="10"/>
+              <circle r="2" cx="290" cy="10"/>
+            </g>
+            <g id="flowDotsM" fill="#FF8A73">
+              <circle r="2.3" cx="290" cy="10"/>
+              <circle r="2.3" cx="290" cy="10"/>
+              <circle r="2" cx="290" cy="10"/>
+              <circle r="2" cx="290" cy="10"/>
+            </g>
+
+            <!-- label dinamis -->
+            <g id="labelsF">
+              <text id="labelPlaqueF" x="163" y="112" font-size="7.5" font-family="Inter, sans-serif" font-weight="700" fill="#9A6A1E" opacity="0">Plak Lemak</text>
+              <text id="labelClotF" x="118" y="190" font-size="7.5" font-family="Inter, sans-serif" font-weight="700" fill="#7A2E22" opacity="0" text-anchor="end">Sumbatan</text>
+              <text id="labelMicroF" x="150" y="298" font-size="7" font-family="Inter, sans-serif" font-weight="700" fill="#B04A3D" opacity="0" text-anchor="middle">Mikrosirkulasi Terhambat</text>
+            </g>
+            <g id="labelsM">
+              <text id="labelPlaqueM" x="472" y="108" font-size="7.5" font-family="Inter, sans-serif" font-weight="700" fill="#9A6A1E" opacity="0">Plak Lemak</text>
+              <text id="labelClotM" x="428" y="205" font-size="7.5" font-family="Inter, sans-serif" font-weight="700" fill="#7A2E22" opacity="0" text-anchor="end">Sumbatan</text>
+              <text id="labelMicroM" x="460" y="290" font-size="7" font-family="Inter, sans-serif" font-weight="700" fill="#B04A3D" opacity="0" text-anchor="middle">Mikrosirkulasi Terhambat</text>
+            </g>
+          </svg>
+        </div>
+        <div class="vasc-hint">Cubit / seret untuk zoom</div>
+        <div class="vasc-stage-badge" id="vascStageBadge" style="background:var(--green-tag);">Sehat</div>
+        <div class="vasc-zoom-controls">
+          <div class="vasc-zoom-btn" onclick="vascZoomBy(0.3)">+</div>
+          <div class="vasc-zoom-btn" onclick="vascZoomBy(-0.3)">&minus;</div>
+        </div>
+        <div class="vasc-zoom-pct" id="vascZoomPct">100%</div>
+      </div>
+      <div class="slider-card">
+        <div class="sc-head"><h4>Simulasi Konsumsi Fast Food</h4><span id="vascPctLabel">0%</span></div>
+        <input type="range" min="0" max="100" value="0" class="range-slider" id="vascSlider">
+        <div class="range-labels"><span>Jarang</span><span>Sedang</span><span>Sangat Sering</span></div>
+      </div>
+      <div class="info-block">
+        <h4 id="vascStageTitle">Pembuluh darah dalam kondisi lentur &amp; terbuka</h4>
+        <p id="vascStageDesc">Geser bilah di atas untuk melihat simulasi bagaimana konsumsi fast food yang berulang memengaruhi elastisitas pembuluh darah menuju ginjal, kandung kemih, dan organ reproduksi.</p>
+      </div>
+
+      <div class="section-title"><h3>Materi Edukasi</h3></div>
+      <div id="eduBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ ARTIKEL ILMIAH ============ -->
+  <div class="screen" id="screen-artikel">
+    <div class="topbar-green"><button class="tb-btn" onclick="showTab('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><div class="tb-title">Artikel Ilmiah</div><div style="width:32px;"></div></div>
+    <div class="app-body">
+      <div class="section-title" style="margin-top:0;"><h3>Penelitian Terkait Diet &amp; Kesehatan Vaskulo-Reproduksi</h3></div>
+      <p style="font-size:12px; color:var(--text-mute); line-height:1.6; margin:0 0 4px;">Kumpulan artikel jurnal ilmiah (PubMed/PMC) yang mendasari materi edukasi NutriRepro-AR, dikelompokkan per topik. Cari kata kunci atau pilih kategori untuk menemukan bacaan sesuai materi yang kamu inginkan.</p>
+
+      <div class="manual-search" style="padding:0;">
+        <input type="text" class="search-input" id="artikelSearchInput" placeholder="Cari topik, mis. kesuburan, ginjal, endotel&hellip;" oninput="filterArtikel()">
+      </div>
+      <div class="filter-chip-row" id="artikelChipRow"></div>
+      <div class="artikel-result-count" id="artikelResultCount"></div>
+
+      <div id="artikelGroupsWrap"></div>
+      <div class="artikel-empty" id="artikelEmpty" style="display:none;">Tidak ada artikel yang cocok dengan pencarianmu.<br>Coba kata kunci lain, misalnya &ldquo;sperma&rdquo;, &ldquo;tekanan darah&rdquo;, atau &ldquo;natrium&rdquo;.</div>
+    </div>
+  </div>
+
+  <!-- ============ SCAN TIPS POPUP ============ -->
+  <div class="modal-overlay" id="scanTipsOverlay">
+    <div class="modal-card">
+      <span class="mc-badge" style="background:var(--green-100); color:var(--green-700);">&#128161; Tips Scan</span>
+      <h3>Cara Menggunakan Scan Makanan</h3>
+      <p>Ikuti tips berikut supaya deteksi &amp; analisis makananmu lebih akurat:</p>
+      <div class="info-block" style="margin-bottom:14px;">
+        <ul>
+          <li>Arahkan kamera ke makanan, lalu pastikan objek terlihat jelas dan pencahayaan cukup.</li>
+          <li>Scanner otomatis hanya dapat mengenali beberapa kategori makanan, seperti pizza, donat, sandwich, buah, dan sayur.</li>
+          <li>Jika makanan tidak termasuk kategori yang dikenali, gunakan kolom Cari Nama Makanan untuk pencarian manual.</li>
+          <li>Pastikan nama makanan yang terdeteksi atau dipilih sudah sesuai sebelum menekan tombol Analisis Makanan.</li>
+          <li>Jika kamera tidak dapat diakses, analisis makanan tetap dapat dilakukan melalui fitur pencarian manual.</li>
+        </ul>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="document.getElementById('scanTipsOverlay').classList.remove('show')">Mengerti, Tutup</button>
+    </div>
+  </div>
+
+  <!-- ============ NUTRI-SWITCH POPUP ============ -->
+  <div class="modal-overlay" id="nutriSwitchOverlay">
+    <div class="modal-card">
+      <span class="mc-badge">&#9888; Natrium/Lemak Terdeteksi Tinggi</span>
+      <h3>Nutri-Switch Strategy</h3>
+      <p>Item ini terdeteksi tinggi garam dan/atau lemak jenuh. Imbangi dengan asupan penawar berikut untuk membantu melebarkan kembali pembuluh darah (vasodilatasi):</p>
+      <div id="nutriSwitchList"></div>
+      <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="document.getElementById('nutriSwitchOverlay').classList.remove('show')">Mengerti, Tutup</button>
+    </div>
+  </div>
+
+  <!-- bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" data-tab="home"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Beranda</button>
+    <button class="nav-btn" data-tab="history"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Riwayat</button>
+    <button class="nav-btn" data-tab="scan"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>Scan</button>
+    <button class="nav-btn" data-tab="edu"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Edukasi</button>
+  </div>
+</div>
+
+<canvas id="hiddenCanvas" style="display:none;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script>
+/* ================= Data ================= */
+// Kategori kualitatif 1-4 (Rendah/Sedang/Tinggi/Ekstrem) berbasis tema literatur gizi-endokrin
+// (lemak trans, gula rafinasi/HFCS, nitrat pengawet, natrium/MSG/BPA). Nutrisi = estimasi rata-rata publik per porsi umum, bukan hasil pengukuran foto.
+const MK = {
+  gorengan:"Digoreng berulang dalam minyak bersuhu tinggi sehingga terbentuk lemak trans yang meningkatkan peradangan sistemik dan resistensi insulin, faktor yang dapat mengganggu sumbu hipotalamus-hipofisis-gonad (HHG) dan siklus ovulasi.",
+  olahanDaging:"Kandungan nitrat/nitrit sebagai pengawet berasosiasi dengan pembentukan senyawa nitrosamin yang dapat memicu stres oksidatif dan berpotensi memengaruhi struktur DNA sperma.",
+  gula:"Gula rafinasi dan/atau HFCS yang tinggi memicu lonjakan glukosa-insulin berulang, berkaitan dengan resistensi insulin yang mendasari gangguan ovulasi pada kondisi seperti PCOS.",
+  natrium:"Kandungan natrium/MSG tinggi serta potensi paparan BPA dari kemasan berasosiasi dengan stres oksidatif ringan bila dikonsumsi rutin dalam jumlah besar.",
+  proteinSehat:"Sumber protein/lemak sehat yang mendukung keseimbangan hormon reproduksi serta kualitas sel telur maupun sperma.",
+  sayur:"Kaya folat, serat, dan antioksidan yang mendukung kematangan sel telur dan menekan stres oksidatif dalam tubuh.",
+  buah:"Kaya vitamin, mineral, dan antioksidan alami yang mendukung kesehatan reproduksi secara umum.",
+  santan:"Santan kental yang dimasak lama melepaskan lemak jenuh dalam jumlah besar, meningkatkan kolesterol LDL dan berkontribusi pada peradangan pembuluh darah yang menghambat aliran darah ke organ reproduksi.",
+  lemakDaging:"Bagian daging berlemak tinggi mengandung lemak jenuh yang, bila rutin dikonsumsi dalam porsi besar, berkaitan dengan peningkatan kolesterol LDL dan gangguan aliran darah mikro ke jaringan reproduksi.",
+  netral:"Tanpa tambahan gula, garam, atau lemak berlebih, minuman/makanan ini relatif netral dan tidak banyak membebani keseimbangan hormon reproduksi maupun pembuluh darah."
+};
+const AL = {
+  gorengan:"Coba versi kukus/panggang dari bahan yang sama, atau ganti dengan camilan tinggi serat seperti ubi kukus atau edamame rebus.",
+  olahanDaging:"Ganti dengan sumber protein segar tanpa pengawet seperti dada ayam, ikan, atau tempe panggang.",
+  gula:"Kurangi porsi gula atau ganti dengan camilan manis alami seperti buah segar atau kolak tanpa gula tambahan.",
+  natrium:"Batasi porsi dan pilih versi segar/buatan sendiri tanpa pengawet bila memungkinkan.",
+  rendah:"Sudah pilihan baik &mdash; pertahankan sebagai bagian dari pola makan harian yang ramah kesuburan.",
+  santan:"Kurangi porsi kuah santan, ambil bagian daging/sayurnya saja, atau sesekali ganti dengan versi berkuah bening seperti soto atau sop.",
+  lemakDaging:"Pilih potongan daging tanpa lemak (has dalam/dada), buang bagian lemak yang terlihat, dan batasi porsi maupun frekuensinya."
+};
+
+const FOOD_DB = [
+ { name:"Burger / Sandwich", cat:"tinggi", level:3, kw:["burger","cheeseburger","hamburger","sandwich","roti isi daging"], cocoLabel:"sandwich",
+   nutrition:{kcal:720,fat:38,satfat:15,sugar:8,sodium:980,protein:28},
+   mechanism:"Kombinasi roti olahan, keju & daging tinggi lemak jenuh, serta natrium dari saus/acar meningkatkan beban glikemik dan tekanan oksidatif yang berkaitan dengan resistensi insulin.",
+   alt:"Ganti dengan burger isi dada ayam panggang, roti gandum utuh, dan sayur segar tanpa saus tinggi natrium." },
+ { name:"Bakwan / Gorengan", cat:"ekstrem", level:4, kw:["bakwan","gorengan","gorengan tepung","gehu","tahu isi goreng"],
+   nutrition:{kcal:280,fat:18,satfat:6,sugar:1,sodium:380,protein:4},
+   mechanism:"Lemak trans dari minyak goreng berulang meningkatkan peradangan sistemik dan resistensi insulin, yang dapat mengganggu sumbu hipotalamus-hipofisis-gonad (HHG) dan siklus ovulasi.",
+   alt:"Ganti dengan camilan panggang/kukus seperti ubi kukus, tahu panggang bumbu, atau edamame rebus." },
+ { name:"Ayam Goreng Tepung", cat:"ekstrem", level:4, kw:["ayam goreng","fried chicken","ayam krispi","ayam tepung"],
+   nutrition:{kcal:450,fat:27,satfat:7,sugar:0,sodium:620,protein:24},
+   mechanism:"Penggorengan bersuhu tinggi berulang membentuk senyawa oksidatif yang berasosiasi dengan stres oksidatif pada sel telur dan penurunan motilitas sperma.",
+   alt:"Pilih ayam panggang/rebus dengan bumbu rempah sebagai sumber protein." },
+ { name:"Donat Glazed", cat:"ekstrem", level:4, kw:["donat","donut","donat glazed"], cocoLabel:"donut",
+   nutrition:{kcal:300,fat:15,satfat:7,sugar:20,sodium:250,protein:4},
+   mechanism:"Kombinasi lemak trans dan gula rafinasi tinggi memicu lonjakan insulin berulang, faktor yang terkait dengan gangguan ovulasi pada kondisi seperti PCOS.",
+   alt:"Coba camilan manis alami seperti pisang panggang madu atau energy ball kurma-kacang." },
+ { name:"Sosis", cat:"ekstrem", level:4, kw:["sosis","sausage","hotdog","hot dog","sosis sapi"], cocoLabel:"hot dog",
+   nutrition:{kcal:250,fat:20,satfat:8,sugar:2,sodium:700,protein:11},
+   mechanism:"Nitrat/nitrit sebagai pengawet berasosiasi dengan pembentukan senyawa nitrosamin yang dapat memicu stres oksidatif dan kerusakan struktur DNA sperma.",
+   alt:"Ganti dengan sumber protein segar tanpa pengawet: dada ayam, telur, atau tempe panggang." },
+ { name:"Nugget Ayam", cat:"ekstrem", level:4, kw:["nugget","nugget ayam","chicken nugget"],
+   nutrition:{kcal:320,fat:20,satfat:5,sugar:1,sodium:540,protein:14},
+   mechanism:"Olahan daging tinggi lemak trans dan pengawet yang dikonsumsi rutin berkontribusi pada peradangan kronis tingkat rendah yang memengaruhi kualitas ovum dan sperma.",
+   alt:"Buat versi rumahan dari dada ayam giling segar, dipanggang tanpa deep-frying." },
+ { name:"Kue / Cake Manis", cat:"ekstrem", level:4, kw:["kue","cake","kue manis","bolu"], cocoLabel:"cake",
+   nutrition:{kcal:350,fat:16,satfat:8,sugar:28,sodium:210,protein:4},
+   mechanism:"Gula rafinasi dan lemak jenuh tinggi dalam satu porsi memicu lonjakan glukosa-insulin besar yang berulang bila dikonsumsi rutin.",
+   alt:"Pilih kue berbahan oat/pisang dengan gula alami dalam porsi kecil." },
+ { name:"Minuman Soda", cat:"tinggi", level:3, kw:["soda","minuman soda","cola","minuman berkarbonasi"],
+   nutrition:{kcal:150,fat:0,satfat:0,sugar:39,sodium:30,protein:0},
+   mechanism:"Gula rafinasi dan HFCS tinggi memicu lonjakan glukosa-insulin cepat, berkaitan dengan resistensi insulin yang mendasari gangguan ovulasi pada PCOS.",
+   alt:"Ganti dengan infused water lemon-mint atau air kelapa muda tanpa tambahan gula." },
+ { name:"Boba / Kopi Kekinian", cat:"tinggi", level:3, kw:["boba","bubble tea","kopi kekinian","kopi susu kekinian"],
+   nutrition:{kcal:320,fat:8,satfat:6,sugar:42,sodium:90,protein:3},
+   mechanism:"Sirup gula tinggi dan topping tinggi kalori menyumbang beban glikemik besar yang berulang, berasosiasi dengan gangguan keseimbangan hormon reproduksi.",
+   alt:"Pilih kopi/teh tanpa gula tambahan, atau kurangi level manis & topping." },
+ { name:"Mie Instan", cat:"tinggi", level:3, kw:["mie instan","indomie","mie cup"],
+   nutrition:{kcal:380,fat:14,satfat:7,sugar:3,sodium:1200,protein:8},
+   mechanism:"Indeks glikemik tinggi dan natrium/MSG besar terkait dengan stres oksidatif dan gangguan metabolik yang berdampak pada fungsi ovarium.",
+   alt:"Ganti dengan mie whole wheat/soba dengan kaldu buatan sendiri dan sayur segar." },
+ { name:"Pizza", cat:"tinggi", level:3, kw:["pizza"], cocoLabel:"pizza",
+   nutrition:{kcal:285,fat:11,satfat:5,sugar:4,sodium:640,protein:12},
+   mechanism:"Tepung olahan, keju tinggi lemak jenuh, dan daging olahan meningkatkan beban glikemik dan paparan nitrat sekaligus.",
+   alt:"Coba pizza base gandum utuh dengan topping sayur dan protein tanpa olahan." },
+ { name:"Saus Tomat / Sambal Kemasan", cat:"sedang", level:2, kw:["saus tomat","sambal botol","saus sambal","saus kemasan"],
+   nutrition:{kcal:20,fat:0,satfat:0,sugar:4,sodium:160,protein:0},
+   mechanism:"Tinggi natrium dan berpotensi terpapar BPA dari kemasan, dikaitkan dengan stres oksidatif ringan pada konsumsi rutin.",
+   alt:"Buat saus/sambal segar dari cabai dan tomat asli tanpa pengawet." },
+ { name:"Sarden Kaleng", cat:"sedang", level:2, kw:["sarden","sarden kaleng","ikan kaleng"],
+   nutrition:{kcal:190,fat:11,satfat:3,sugar:1,sodium:400,protein:17},
+   mechanism:"Kemasan kaleng berpotensi mengandung BPA dan natrium tinggi dari saus, berasosiasi dengan gangguan endokrin ringan pada paparan jangka panjang.",
+   alt:"Pilih ikan segar seperti kembung atau tongkol yang dimasak sendiri." },
+ { name:"Permen Karet", cat:"sedang", level:2, kw:["permen karet","gum","chewing gum"],
+   nutrition:{kcal:10,fat:0,satfat:0,sugar:2,sodium:0,protein:0},
+   mechanism:"Pemanis buatan & zat pengemas tertentu berasosiasi dengan stres oksidatif ringan, meski dampaknya jauh lebih kecil dibanding kategori lain.",
+   alt:"Ganti dengan buah segar potong untuk kesegaran napas dan asupan serat." },
+ { name:"Alpukat", cat:"rendah", level:1, kw:["alpukat","avocado"],
+   nutrition:{kcal:240,fat:22,satfat:3,sugar:1,sodium:10,protein:3},
+   mechanism:"Kaya lemak tak jenuh tunggal dan folat yang mendukung keseimbangan hormon reproduksi serta kualitas sel telur.",
+   alt:"Sudah pilihan baik &mdash; nikmati langsung atau sebagai campuran salad." },
+ { name:"Salmon Panggang", cat:"rendah", level:1, kw:["salmon","ikan salmon","salmon panggang"],
+   nutrition:{kcal:230,fat:13,satfat:3,sugar:0,sodium:60,protein:25},
+   mechanism:"Omega-3 tinggi membantu menurunkan peradangan dan mendukung kualitas sperma serta keteraturan ovulasi.",
+   alt:"Pertahankan pola masak panggang/kukus, hindari digoreng agar manfaat omega-3 optimal." },
+ { name:"Kacang Almond / Walnut", cat:"rendah", level:1, kw:["almond","walnut","kacang almond","kacang walnut"],
+   nutrition:{kcal:170,fat:15,satfat:1,sugar:1,sodium:0,protein:6},
+   mechanism:"Sumber vitamin E dan zinc yang berperan melindungi sel telur dan sperma dari stres oksidatif.",
+   alt:"Jadikan camilan harian dalam porsi segenggam sebagai pengganti camilan olahan." },
+ { name:"Pisang", cat:"rendah", level:1, kw:["pisang","banana"], cocoLabel:"banana",
+   nutrition:{kcal:105,fat:0.3,satfat:0,sugar:14,sodium:1,protein:1},
+   mechanism:"Sumber kalium dan vitamin B6 yang mendukung keseimbangan energi dan fungsi hormon secara umum.",
+   alt:"Pilihan camilan yang baik &mdash; cocok dikonsumsi langsung sebelum/sesudah aktivitas." },
+ { name:"Apel", cat:"rendah", level:1, kw:["apel","apple"], cocoLabel:"apple",
+   nutrition:{kcal:95,fat:0.3,satfat:0,sugar:19,sodium:2,protein:0.5},
+   mechanism:"Kaya serat dan antioksidan polifenol yang membantu menekan stres oksidatif dalam tubuh.",
+   alt:"Nikmati dengan kulitnya untuk asupan serat maksimal." },
+ { name:"Jeruk", cat:"rendah", level:1, kw:["jeruk","orange"], cocoLabel:"orange",
+   nutrition:{kcal:62,fat:0.2,satfat:0,sugar:12,sodium:0,protein:1},
+   mechanism:"Vitamin C tinggi berperan sebagai antioksidan yang mendukung kualitas sperma dan sel telur.",
+   alt:"Konsumsi utuh lebih baik daripada dalam bentuk jus kemasan bergula." },
+ { name:"Brokoli", cat:"rendah", level:1, kw:["brokoli","broccoli"], cocoLabel:"broccoli",
+   nutrition:{kcal:55,fat:0.6,satfat:0,sugar:2,sodium:33,protein:4},
+   mechanism:"Kaya folat dan sulforafan yang mendukung kematangan sel telur dan detoksifikasi alami tubuh.",
+   alt:"Kukus sebentar agar kandungan folat & vitamin tetap optimal." },
+ { name:"Wortel", cat:"rendah", level:1, kw:["wortel","carrot"], cocoLabel:"carrot",
+   nutrition:{kcal:41,fat:0.2,satfat:0,sugar:5,sodium:69,protein:1},
+   mechanism:"Beta-karoten mendukung produksi hormon reproduksi dan kesehatan lapisan sel secara umum.",
+   alt:"Baik dikonsumsi mentah sebagai camilan atau campuran salad." },
+
+ /* ===== 79 makanan & minuman Indonesia tambahan =====
+    Kategori kualitatif mengikuti tema yang sama (lemak trans/gorengan, daging olahan
+    nitrat, gula rafinasi/HFCS, natrium-MSG-BPA). Mekanisme & rekomendasi memakai teks
+    template per subkategori karena 79 nilai gizi presisi per item tidak dapat diverifikasi
+    satu per satu — nutrition sengaja dikosongkan (bukan dikarang) untuk item-item ini. */
+
+ // -- Ekstrem: gorengan / lemak trans --
+ { name:"Cireng", cat:"ekstrem", level:4, kw:["cireng"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Cimol", cat:"ekstrem", level:4, kw:["cimol"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Tahu Isi Goreng", cat:"ekstrem", level:4, kw:["tahu isi","tahu isi goreng"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Tempe Mendoan", cat:"ekstrem", level:4, kw:["mendoan","tempe mendoan"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Pisang Goreng", cat:"ekstrem", level:4, kw:["pisang goreng"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Combro", cat:"ekstrem", level:4, kw:["combro"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Misro", cat:"ekstrem", level:4, kw:["misro"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Risoles Goreng", cat:"ekstrem", level:4, kw:["risoles"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Martabak Telur Goreng", cat:"ekstrem", level:4, kw:["martabak telur"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Lumpia Goreng", cat:"ekstrem", level:4, kw:["lumpia goreng","lumpia"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Kentang Goreng", cat:"ekstrem", level:4, kw:["kentang goreng","french fries"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Onion Rings", cat:"ekstrem", level:4, kw:["onion rings","bawang goreng tepung"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Perkedel Goreng", cat:"ekstrem", level:4, kw:["perkedel"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Otak-otak Goreng", cat:"ekstrem", level:4, kw:["otak-otak","otak otak goreng"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Kerupuk Kulit (Rambak)", cat:"ekstrem", level:4, kw:["kerupuk kulit","rambak"], mechanism:MK.gorengan, alt:AL.gorengan },
+ // -- Ekstrem: daging olahan / nitrat --
+ { name:"Bacon", cat:"ekstrem", level:4, kw:["bacon"], mechanism:MK.olahanDaging, alt:AL.olahanDaging },
+ { name:"Kornet Kaleng", cat:"ekstrem", level:4, kw:["kornet","corned beef"], mechanism:MK.olahanDaging, alt:AL.olahanDaging },
+ { name:"Sosis Bakar", cat:"ekstrem", level:4, kw:["sosis bakar"], mechanism:MK.olahanDaging, alt:AL.olahanDaging },
+ { name:"Daging Asap (Smoked Beef)", cat:"ekstrem", level:4, kw:["daging asap","smoked beef"], mechanism:MK.olahanDaging, alt:AL.olahanDaging },
+ { name:"Dendeng Kemasan", cat:"ekstrem", level:4, kw:["dendeng","dendeng kemasan"], mechanism:MK.olahanDaging, alt:AL.olahanDaging },
+
+ // -- Tinggi: gula rafinasi / HFCS --
+ { name:"Es Teh Manis Kemasan", cat:"tinggi", level:3, kw:["es teh manis","teh manis kemasan"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Es Jeruk Manis Kemasan", cat:"tinggi", level:3, kw:["es jeruk manis"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Teh Botol Kemasan", cat:"tinggi", level:3, kw:["teh botol","teh kemasan"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Minuman Energi", cat:"tinggi", level:3, kw:["minuman energi","energy drink"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Kopi Susu Kemasan Botol", cat:"tinggi", level:3, kw:["kopi susu kemasan","kopi botol"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Cokelat Batangan", cat:"tinggi", level:3, kw:["cokelat batang","coklat batangan"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Permen Cokelat", cat:"tinggi", level:3, kw:["permen coklat","permen cokelat"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Wafer Cokelat", cat:"tinggi", level:3, kw:["wafer coklat","wafer cokelat"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Biskuit Sandwich Krim", cat:"tinggi", level:3, kw:["biskuit krim","biskuit sandwich"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Roti Manis Isi Cokelat", cat:"tinggi", level:3, kw:["roti coklat","roti manis"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Martabak Manis (Terang Bulan)", cat:"tinggi", level:3, kw:["martabak manis","terang bulan"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Es Krim", cat:"tinggi", level:3, kw:["es krim","ice cream"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Es Cendol / Dawet", cat:"tinggi", level:3, kw:["cendol","dawet"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Es Campur", cat:"tinggi", level:3, kw:["es campur"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Kue Cubit", cat:"tinggi", level:3, kw:["kue cubit"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Churros", cat:"tinggi", level:3, kw:["churros"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Kolak Pisang Santan", cat:"tinggi", level:3, kw:["kolak","kolak pisang"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Sereal Manis Kemasan", cat:"tinggi", level:3, kw:["sereal manis","cereal"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Minuman Rasa Buah Kemasan", cat:"tinggi", level:3, kw:["minuman rasa buah","sari buah kemasan manis"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Sirup Kemasan", cat:"tinggi", level:3, kw:["sirup"], mechanism:MK.gula, alt:AL.gula },
+
+ // -- Sedang: natrium / MSG / BPA --
+ { name:"Kerupuk Udang", cat:"sedang", level:2, kw:["kerupuk udang"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Keripik Balado", cat:"sedang", level:2, kw:["keripik balado"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Snack Kentang Kemasan Asin", cat:"sedang", level:2, kw:["snack kentang","keripik kentang kemasan","chiki"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Terasi / Petis Kemasan", cat:"sedang", level:2, kw:["terasi","petis"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Kecap Manis Kemasan", cat:"sedang", level:2, kw:["kecap manis"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Abon Sapi Kemasan", cat:"sedang", level:2, kw:["abon","abon sapi"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Ikan Asin", cat:"sedang", level:2, kw:["ikan asin"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Telur Asin", cat:"sedang", level:2, kw:["telur asin"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Saus Tiram Kemasan", cat:"sedang", level:2, kw:["saus tiram"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Bumbu / Kaldu Bubuk Instan", cat:"sedang", level:2, kw:["kaldu bubuk","bumbu instan","penyedap"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Kerupuk Aci", cat:"sedang", level:2, kw:["kerupuk aci"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Bihun Goreng Instan", cat:"sedang", level:2, kw:["bihun goreng instan"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Keripik Singkong Asin", cat:"sedang", level:2, kw:["keripik singkong"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Ikan Teri Asin Kemasan", cat:"sedang", level:2, kw:["teri asin","ikan teri kemasan"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Petis Kemasan", cat:"sedang", level:2, kw:["petis kemasan"], mechanism:MK.natrium, alt:AL.natrium },
+
+ // -- Rendah: protein/lemak sehat --
+ { name:"Tempe Kukus", cat:"rendah", level:1, kw:["tempe kukus"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Tahu Kukus", cat:"rendah", level:1, kw:["tahu kukus"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Ikan Kembung Bakar", cat:"rendah", level:1, kw:["ikan kembung","kembung bakar"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Ikan Nila Panggang", cat:"rendah", level:1, kw:["ikan nila","nila panggang"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Ayam Kampung Rebus", cat:"rendah", level:1, kw:["ayam kampung rebus","ayam rebus"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Telur Rebus", cat:"rendah", level:1, kw:["telur rebus"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Tempe Bacem Kukus", cat:"rendah", level:1, kw:["tempe bacem"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Kacang Tanah Rebus", cat:"rendah", level:1, kw:["kacang rebus","kacang tanah rebus"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Edamame Rebus", cat:"rendah", level:1, kw:["edamame"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Yogurt Plain Tanpa Gula", cat:"rendah", level:1, kw:["yogurt plain","yogurt tawar"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Susu Kedelai Tanpa Gula", cat:"rendah", level:1, kw:["susu kedelai"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ // -- Rendah: sayur --
+ { name:"Sayur Bening Bayam", cat:"rendah", level:1, kw:["sayur bening bayam","bayam bening"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Sayur Asem", cat:"rendah", level:1, kw:["sayur asem"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Pecel Sayur", cat:"rendah", level:1, kw:["pecel"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Gado-gado (tanpa gorengan)", cat:"rendah", level:1, kw:["gado-gado","gado gado"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Ubi Jalar Kukus", cat:"rendah", level:1, kw:["ubi kukus","ubi jalar kukus"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Jagung Rebus", cat:"rendah", level:1, kw:["jagung rebus"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Sup Sayur Bening", cat:"rendah", level:1, kw:["sup sayur","sop sayur"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Salad Sayur Segar", cat:"rendah", level:1, kw:["salad sayur","salad segar"], mechanism:MK.sayur, alt:AL.rendah },
+ // -- Rendah: buah --
+ { name:"Pepaya", cat:"rendah", level:1, kw:["pepaya"], mechanism:MK.buah, alt:AL.rendah },
+ { name:"Semangka", cat:"rendah", level:1, kw:["semangka"], mechanism:MK.buah, alt:AL.rendah },
+ { name:"Mangga", cat:"rendah", level:1, kw:["mangga"], mechanism:MK.buah, alt:AL.rendah },
+ { name:"Pisang Rebus", cat:"rendah", level:1, kw:["pisang rebus"], mechanism:MK.buah, alt:AL.rendah },
+ { name:"Air Kelapa Muda", cat:"rendah", level:1, kw:["air kelapa","kelapa muda"], mechanism:MK.buah, alt:AL.rendah },
+
+ /* ===== 33 makanan khas Indonesia tambahan (nasi campur, berkuah, bersantan, camilan sehat) ===== */
+
+ // -- Ekstrem: bersantan kental / gorengan berat / daging sangat berlemak --
+ { name:"Rendang Daging", cat:"ekstrem", level:4, kw:["rendang","rendang daging","rendang sapi"], mechanism:MK.santan, alt:AL.santan },
+ { name:"Nasi Padang (Rendang & Gulai)", cat:"ekstrem", level:4, kw:["nasi padang"], mechanism:MK.santan, alt:AL.santan },
+ { name:"Batagor", cat:"ekstrem", level:4, kw:["batagor"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Sate Kambing", cat:"ekstrem", level:4, kw:["sate kambing"], mechanism:MK.lemakDaging, alt:AL.lemakDaging },
+
+ // -- Tinggi: santan sedang, gorengan ringan, kuah kental/berlemak --
+ { name:"Nasi Goreng", cat:"tinggi", level:3, kw:["nasi goreng","fried rice"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Mie Goreng", cat:"tinggi", level:3, kw:["mie goreng","mi goreng"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Gulai Ayam", cat:"tinggi", level:3, kw:["gulai ayam","gulai"], mechanism:MK.santan, alt:AL.santan },
+ { name:"Opor Ayam", cat:"tinggi", level:3, kw:["opor ayam","opor"], mechanism:MK.santan, alt:AL.santan },
+ { name:"Gudeg", cat:"tinggi", level:3, kw:["gudeg"], mechanism:MK.santan, alt:AL.santan },
+ { name:"Sop Buntut", cat:"tinggi", level:3, kw:["sop buntut","sup buntut"], mechanism:MK.lemakDaging, alt:AL.lemakDaging },
+ { name:"Tahu Goreng", cat:"tinggi", level:3, kw:["tahu goreng"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Tempe Goreng", cat:"tinggi", level:3, kw:["tempe goreng"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Ayam Goreng Kampung", cat:"tinggi", level:3, kw:["ayam goreng kampung","ayam goreng biasa"], mechanism:MK.gorengan, alt:AL.gorengan },
+
+ // -- Sedang: berkuah dengan natrium/MSG cukup tinggi, atau lemak jenuh sedang --
+ { name:"Bakso Sapi", cat:"sedang", level:2, kw:["bakso","bakso sapi"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Soto Ayam", cat:"sedang", level:2, kw:["soto ayam","soto"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Rawon", cat:"sedang", level:2, kw:["rawon"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Sate Ayam Bumbu Kacang", cat:"sedang", level:2, kw:["sate ayam","sate"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Nasi Uduk", cat:"sedang", level:2, kw:["nasi uduk"], mechanism:MK.santan, alt:AL.santan },
+ { name:"Siomay", cat:"sedang", level:2, kw:["siomay"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Ketoprak", cat:"sedang", level:2, kw:["ketoprak"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Rujak Buah", cat:"sedang", level:2, kw:["rujak","rujak buah"], mechanism:MK.gula, alt:AL.gula },
+ { name:"Bubur Ayam", cat:"sedang", level:2, kw:["bubur ayam"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Telur Dadar Minyak Banyak", cat:"sedang", level:2, kw:["telur dadar"], mechanism:MK.gorengan, alt:AL.gorengan },
+ { name:"Keju Cheddar", cat:"sedang", level:2, kw:["keju","keju cheddar"],
+   nutrition:{kcal:113,fat:9,satfat:6,sugar:0.5,sodium:180,protein:7},
+   mechanism:"Lemak jenuh yang cukup tinggi per porsi dapat berkontribusi pada peningkatan kolesterol LDL bila dikonsumsi rutin dalam jumlah besar.",
+   alt:"Batasi porsi (1-2 lembar) dan imbangi dengan sayur atau buah tinggi serat." },
+ { name:"Susu Full Cream", cat:"sedang", level:2, kw:["susu full cream","susu sapi"],
+   nutrition:{kcal:150,fat:8,satfat:5,sugar:12,sodium:105,protein:8},
+   mechanism:"Lemak jenuh dari lemak susu dalam jumlah besar & rutin dikaitkan dengan peningkatan kolesterol LDL yang berpotensi memengaruhi kesehatan pembuluh darah.",
+   alt:"Pilih varian rendah lemak (low-fat) atau batasi porsi sekitar 1 gelas per hari." },
+
+ // -- Rendah: protein/karbo/minuman minim olahan --
+ { name:"Ikan Bakar", cat:"rendah", level:1, kw:["ikan bakar"], mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Capcay Rebus", cat:"rendah", level:1, kw:["capcay","cap cay"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Tumis Kangkung", cat:"rendah", level:1, kw:["tumis kangkung","kangkung"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Roti Tawar Gandum", cat:"rendah", level:1, kw:["roti gandum","roti tawar gandum","whole wheat bread"],
+   mechanism:"Serat pada gandum utuh memperlambat penyerapan gula darah dibanding tepung olahan biasa, membantu menjaga kestabilan kadar insulin.", alt:AL.rendah },
+ { name:"Oatmeal Plain", cat:"rendah", level:1, kw:["oatmeal","oat"],
+   mechanism:"Kandungan beta-glukan pada oat membantu menstabilkan gula darah dan mendukung sensitivitas insulin yang berkaitan dengan keteraturan ovulasi.", alt:AL.rendah },
+ { name:"Nasi Merah", cat:"rendah", level:1, kw:["nasi merah","beras merah"],
+   mechanism:"Serat dan indeks glikemik yang lebih rendah dibanding nasi putih membantu menjaga kestabilan gula darah dan sensitivitas insulin.", alt:AL.rendah },
+ { name:"Kopi Hitam Tanpa Gula", cat:"rendah", level:1, kw:["kopi hitam","americano","kopi tanpa gula"], mechanism:MK.netral, alt:AL.rendah },
+ { name:"Teh Tawar", cat:"rendah", level:1, kw:["teh tawar","teh pahit"], mechanism:MK.netral, alt:AL.rendah },
+ { name:"Kacang Hijau Rebus", cat:"rendah", level:1, kw:["kacang hijau","kacang hijau rebus"], mechanism:MK.proteinSehat, alt:AL.rendah }
+];
+const CAT_LABEL = { ekstrem:"Risiko Ekstrem", tinggi:"Risiko Tinggi", sedang:"Risiko Sedang", rendah:"Ramah Kesuburan" };
+const CAT_COLOR = { ekstrem:"#D6584B", tinggi:"#E38A34", sedang:"#D4A02F", rendah:"#2F9B5D" };
+const COCO_TO_DB = {}; FOOD_DB.forEach(f=>{ if(f.cocoLabel) COCO_TO_DB[f.cocoLabel]=f; });
+
+const DAMPAK = {
+  ekstrem:{ wanita:{short:["Gangguan hormon (estrogen & progesteron)","Siklus menstruasi tidak teratur","Peningkatan stres oksidatif pada sel telur"], long:["Risiko infertilitas meningkat","Risiko PCOS & endometriosis","Penurunan kualitas kehamilan"]},
+            pria:{short:["Penurunan kualitas & motilitas sperma","Peningkatan stres oksidatif testis","Gangguan kadar testosteron"], long:["Risiko infertilitas jangka panjang","Kerusakan DNA sperma kumulatif","Penurunan volume & konsentrasi sperma"]},
+            rekomendasi:"Batasi konsumsi kategori ini. Pilih makanan segar, minim olahan, dan tinggi antioksidan untuk menjaga kesehatan reproduksi." },
+  tinggi:{ wanita:{short:["Lonjakan gula darah & insulin","Gangguan ringan pola ovulasi","Peningkatan peradangan ringan"], long:["Risiko resistensi insulin & PCOS","Ketidakteraturan siklus menstruasi","Penurunan kualitas sel telur seiring waktu"]},
+           pria:{short:["Penurunan energi & kualitas sperma sementara","Peningkatan peradangan ringan"], long:["Risiko penurunan jumlah sperma jangka panjang","Kontribusi terhadap resistensi insulin"]},
+           rekomendasi:"Konsumsi sesekali dalam porsi wajar, imbangi dengan makanan tinggi serat dan protein segar." },
+  sedang:{ wanita:{short:["Sedikit peningkatan natrium tubuh","Potensi stres oksidatif ringan"], long:["Kontribusi kecil terhadap peradangan kronis bila rutin"]},
+           pria:{short:["Dampak minor terhadap kualitas sperma"], long:["Kontribusi kecil pada stres oksidatif jangka panjang bila berlebihan"]},
+           rekomendasi:"Aman dikonsumsi dalam jumlah wajar; perhatikan total asupan natrium harian." },
+  rendah:{ wanita:{short:["Mendukung keseimbangan hormon","Membantu kualitas sel telur"], long:["Mendukung keteraturan siklus ovulasi","Menurunkan risiko stres oksidatif jangka panjang"]},
+           pria:{short:["Mendukung kualitas & motilitas sperma"], long:["Membantu menjaga kadar testosteron seimbang","Melindungi DNA sperma dari kerusakan oksidatif"]},
+           rekomendasi:"Pertahankan &mdash; makanan ini termasuk pilihan yang ramah untuk kesehatan reproduksi." }
+};
+
+let mediaStream=null, lastCapturedDataUrl=null, selectedFood=null, history=[];
+let cocoModel=null, detectLoopId=null, currentDetection=null;
+
+/* ---------- Nav ---------- */
+function showTab(tab){
+  document.getElementById('wrap-home').style.display = tab==='home' ? 'flex':'none';
+  ['scan','confirm','result','history','edu','artikel'].forEach(s=>{
+    document.getElementById('screen-'+s).classList.toggle('active', s===tab);
+  });
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  if(tab==='scan') startCameraFlow(); else stopDetectLoop();
+  if(tab==='home') renderHome();
+  if(tab==='edu'){ renderEdu(); initVascular3D(); }
+  if(tab==='artikel') renderArtikel();
+  if(tab==='history') renderTrendChart();
+}
+function goToScan(){ showTab('scan'); }
+document.querySelectorAll('.nav-btn').forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
+
+/* ---------- Home render ---------- */
+function renderHome(){
+  const recentWrap = document.getElementById('homeRecent');
+  if(history.length===0){
+    recentWrap.innerHTML = `<div class="empty-state" style="padding:24px 10px;"><p>Belum ada riwayat scan hari ini.</p></div>`;
+  }else{
+    recentWrap.innerHTML='';
+    history.slice(0,2).forEach(h=>{
+      const div=document.createElement('div');
+      div.className='mini-history'; div.style.marginBottom='8px';
+      div.innerHTML=`<img src="${h.img||placeholderSVG()}"><div style="flex:1;"><div class="mh-name">${h.food.name}</div><div class="mh-time">${h.time}</div></div><span class="si-tag tag-${h.food.cat}">${h.food.cat}</span>`;
+      div.addEventListener('click', ()=>{ renderResult(h.food,h.img,h.time); showTab('result'); });
+      recentWrap.appendChild(div);
+    });
+  }
+  const ring=document.getElementById('homeRing'), val=document.getElementById('homeRingVal');
+  const label=document.getElementById('homeScoreLabel'), desc=document.getElementById('homeScoreDesc');
+  const circumference=207.3;
+  if(history.length===0){
+    ring.setAttribute('stroke-dasharray',`0 ${circumference}`);
+    val.textContent='&mdash;'; val.innerHTML='&mdash;';
+    label.textContent='Belum Ada Data';
+    desc.textContent='Scan makananmu untuk mulai melihat ringkasan pola makan harian di sini.';
+  }else{
+    const avgLevel = history.reduce((s,h)=>s+h.food.level,0)/history.length;
+    const healthy = Math.round(((4-avgLevel)/3)*100);
+    ring.setAttribute('stroke-dasharray', `${(healthy/100)*circumference} ${circumference}`);
+    ring.setAttribute('stroke', healthy>=70?'#2F9B5D':healthy>=40?'#D4A02F':'#D6584B');
+    val.textContent = healthy+'%';
+    label.textContent = healthy>=70?'Skor Pola Makan: Baik':healthy>=40?'Skor Pola Makan: Cukup':'Skor Pola Makan: Perlu Perhatian';
+    desc.textContent = `Berdasarkan ${history.length} makanan yang kamu scan, skor ini gambaran gaya hidup, bukan diagnosis medis.`;
+  }
+}
+function renderEdu(){
+  const topics=[
+    {t:"Apa itu PCOS?", b:"Polycystic Ovary Syndrome (PCOS) adalah gangguan hormon yang umum pada usia reproduktif, sering berkaitan dengan resistensi insulin. Pola makan rendah gula rafinasi dan lemak trans dapat membantu mengelola gejalanya.", q:"resistensi insulin"},
+    {t:"Peran Antioksidan bagi Kesuburan", b:"Antioksidan seperti vitamin C, E, dan zinc membantu melindungi sel telur dan sperma dari kerusakan akibat stres oksidatif, yang dapat dipicu oleh polusi, rokok, dan makanan olahan.", q:"antioksidan"},
+    {t:"Pola Makan Anti-Inflamasi", b:"Pola makan tinggi sayur, buah, ikan berlemak, dan kacang-kacangan dikaitkan dengan peradangan tubuh yang lebih rendah, yang mendukung fungsi hormon reproduksi yang lebih stabil.", q:"diet mediterania"},
+    {t:"Gula Rafinasi & Resistensi Insulin", b:"Konsumsi gula rafinasi berlebih dapat memicu lonjakan insulin berulang. Seiring waktu, ini berkaitan dengan resistensi insulin, salah satu faktor yang mendasari gangguan ovulasi.", q:"gula"},
+    {t:"Jalur Pembuluh Darah: Dari Piring ke Organ Reproduksi", b:"Natrium dan lemak jenuh berlebih dapat mengganggu lapisan dalam pembuluh darah (endotel) sehingga elastisitasnya berkurang. Karena ginjal, kandung kemih, dan organ reproduksi sangat bergantung pada aliran darah mikro yang lancar, gangguan pada endotel ini ikut menghambat suplai oksigen &amp; nutrisi ke jaringan tersebut &mdash; inilah dasar dari animasi di bagian atas halaman ini.", q:"endotel"},
+    {t:"L-Arginin & Antioksidan sebagai Penawar", b:"L-arginin adalah asam amino yang tubuh ubah menjadi nitrat oksida (NO), senyawa yang membantu otot pembuluh darah relaksasi (vasodilatasi). Sumber alaminya antara lain kacang-kacangan, ikan, dan biji labu. Dipadukan dengan antioksidan dari buah &amp; sayur berwarna, kombinasi ini menjadi dasar rekomendasi pada fitur Nutri-Switch setiap kali makanan tinggi garam/lemak terdeteksi.", q:"vasodilatasi"}
+  ];
+  const wrap=document.getElementById('eduBody'); wrap.innerHTML='';
+  topics.forEach((tp,i)=>{
+    const div=document.createElement('div'); div.className='accordion'; div.style.marginBottom='10px';
+    div.innerHTML=`<div class="acc-head" onclick="this.parentElement.classList.toggle('open')"><span>${tp.t}</span><svg class="acc-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6D7C72" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-body">${tp.b}<div class="acc-refs" onclick="event.stopPropagation(); cariReferensi('${tp.q.replace(/'/g,"\\'")}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Cari referensi ilmiah tentang ini &rsaquo;</div></div>`;
+    wrap.appendChild(div);
+  });
+}
+/* ---------- Artikel Ilmiah: data, pengelompokan & pencarian referensi ---------- */
+const ARTIKEL_DATA=[
+  {
+    cat:'Endotel & Vaskular',
+    title:'Fast-Food Meal Reduces Peripheral Artery Endothelial Function',
+    desc:'Penelitian Patik dkk. (2018) menunjukkan bahwa hanya satu kali mengonsumsi makanan cepat saji yang tinggi lemak dan natrium (sekitar 2.100 mg natrium) dapat menurunkan fungsi pelebaran pembuluh darah tepi pada pria sehat, bahkan hanya dalam hitungan jam setelah dikonsumsi.',
+    href:'https://pmc.ncbi.nlm.nih.gov/articles/PMC6139709/', source:'PMC',
+    kw:['fast food','junk food','pembuluh darah','endotel','vaskular','natrium','lemak jenuh','jantung','tekanan darah']
+  },
+  {
+    cat:'Kesuburan Pria',
+    title:'Diet and Male Fertility: Nutrients & Antioxidants on Sperm Metabolism',
+    desc:'Tinjauan ilmiah menunjukkan bahwa pola makan tinggi lemak jenuh dapat menurunkan kualitas sperma, sedangkan pola makan Mediterania dikaitkan dengan kualitas sperma yang lebih baik dan berpotensi membantu melindungi kesuburan pria dari risiko infertilitas.',
+    href:'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8910394/', source:'PMC',
+    kw:['kesuburan','sperma','fertilitas','antioksidan','pria','reproduksi pria','infertilitas']
+  },
+  {
+    cat:'Kesuburan Pria',
+    title:'Dietary Patterns, Foods and Nutrients in Male Fertility Parameters',
+    desc:'Tinjauan sistematis terhadap 35 studi menunjukkan bahwa konsumsi makanan olahan, produk susu tinggi lemak, dan minuman manis berhubungan dengan penurunan kualitas sperma, termasuk berbagai parameter yang menilai kesehatan dan fungsi sperma.',
+    href:'https://pubmed.ncbi.nlm.nih.gov/28333357/', source:'PubMed',
+    kw:['kesuburan','sperma','pola makan','makanan olahan','gula','minuman manis','fertilitas pria']
+  },
+  {
+    cat:'Urologi / Ginjal',
+    title:'Global Burden of CKD Attributable to High Sodium Intake',
+    desc:'Analisis beban penyakit global menunjukkan bahwa konsumsi natrium berlebih berkontribusi signifikan terhadap kematian dan kecacatan akibat penyakit ginjal kronis (PGK), dengan tren yang terus meningkat sejak tahun 1990.',
+    href:'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10018037/', source:'PMC',
+    kw:['ginjal','natrium','garam','penyakit ginjal kronis','pgk','urologi','kandung kemih']
+  },
+  {
+    cat:'Intervensi Diet',
+    title:'Effects of Mediterranean Diet on Endothelial Reactivity',
+    desc:'Uji klinis acak menunjukkan bahwa pola makan Mediterania, yang kaya sayuran, ikan, dan minyak zaitun, memperbaiki fungsi pelebaran pembuluh darah dibandingkan dengan diet kontrol dalam waktu 8 minggu. Temuan ini mendukung pola makan sehat sebagai strategi nutrisi untuk menjaga kesehatan pembuluh darah.',
+    href:'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11592348/', source:'PMC',
+    kw:['diet mediterania','pola makan sehat','sayur','ikan','minyak zaitun','vasodilatasi','pembuluh darah']
+  }
+];
+let artikelActiveCat='Semua';
+function initArtikelChips(){
+  const row=document.getElementById('artikelChipRow');
+  const cats=['Semua', ...new Set(ARTIKEL_DATA.map(a=>a.cat))];
+  row.innerHTML=cats.map(c=>`<button class="filter-chip${c===artikelActiveCat?' active':''}" data-cat="${c}" onclick="setArtikelCat('${c.replace(/'/g,"\\'")}')" type="button">${c}</button>`).join('');
+}
+function setArtikelCat(cat){
+  artikelActiveCat=cat;
+  document.querySelectorAll('#artikelChipRow .filter-chip').forEach(b=> b.classList.toggle('active', b.dataset.cat===cat));
+  filterArtikel();
+}
+function filterArtikel(){
+  const q=(document.getElementById('artikelSearchInput').value||'').trim().toLowerCase();
+  const filtered=ARTIKEL_DATA.filter(a=>{
+    if(artikelActiveCat!=='Semua' && a.cat!==artikelActiveCat) return false;
+    if(!q) return true;
+    const hay=(a.title+' '+a.desc+' '+a.cat+' '+a.kw.join(' ')).toLowerCase();
+    return hay.includes(q);
+  });
+  renderArtikelGroups(filtered, q);
+}
+function renderArtikelGroups(list, q){
+  const wrap=document.getElementById('artikelGroupsWrap');
+  const empty=document.getElementById('artikelEmpty');
+  const countEl=document.getElementById('artikelResultCount');
+  if(list.length===0){
+    wrap.innerHTML=''; empty.style.display='block';
+    countEl.textContent = q ? `Tidak ada hasil untuk "${q}"` : '';
+    return;
+  }
+  empty.style.display='none';
+  countEl.textContent = `${list.length} artikel ditemukan`;
+  const groups=[];
+  list.forEach(a=>{
+    let g=groups.find(g=>g.cat===a.cat);
+    if(!g){ g={cat:a.cat, items:[]}; groups.push(g); }
+    g.items.push(a);
+  });
+  wrap.innerHTML=groups.map(g=>`
+    <div class="artikel-group-title">${g.cat}<span class="agt-count">(${g.items.length} artikel)</span></div>
+    <div class="artikel-group">
+      ${g.items.map(a=>`
+        <a class="article-card" href="${a.href}" target="_blank" rel="noopener">
+          <div class="ac-tag">${a.cat}</div>
+          <h4>${a.title}</h4>
+          <p>${a.desc}</p>
+          <span class="ac-link">Baca di ${a.source} &rsaquo;</span>
+        </a>`).join('')}
+    </div>`).join('');
+}
+function renderArtikel(){ initArtikelChips(); filterArtikel(); }
+/* Dipanggil dari topik Edukasi: lompat ke Artikel Ilmiah dengan pencarian otomatis sesuai materi */
+function cariReferensi(query){
+  showTab('artikel');
+  setTimeout(()=>{
+    artikelActiveCat='Semua';
+    initArtikelChips();
+    const input=document.getElementById('artikelSearchInput');
+    input.value=query;
+    filterArtikel();
+    input.focus();
+  }, 60);
+}
+
+/* ---------- Camera + AR detection ---------- */
+const video=document.getElementById('video'), viewfinder=document.getElementById('viewfinder');
+const overlayCanvas=document.getElementById('overlayCanvas'), hiddenCanvas=document.getElementById('hiddenCanvas');
+const arPill=document.getElementById('arPill'), arPillText=document.getElementById('arPillText');
+const detectChip=document.getElementById('detectChip');
+let cameraStarted=false, modelLoadStarted=false;
+
+async function startCameraFlow(){
+  document.getElementById('capturedImgTag').style.display='none';
+  video.style.display='block';
+  viewfinder.classList.remove('errored');
+  if(!cameraStarted){
+    cameraStarted=true;
+    try{
+      mediaStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'environment'}, audio:false });
+      video.srcObject = mediaStream;
+    }catch(err){
+      viewfinder.classList.add('errored');
+      arPill.className='ar-pill off'; arPillText.textContent='Kamera Tidak Tersedia';
+      return;
+    }
+  }
+  loadCocoModel();
+}
+async function loadCocoModel(){
+  if(cocoModel){ startDetectLoop(); return; }
+  if(modelLoadStarted) return;
+  modelLoadStarted=true;
+  try{
+    cocoModel = await cocoSsd.load();
+    arPill.className='ar-pill'; arPillText.textContent='AR Aktif';
+    startDetectLoop();
+  }catch(e){
+    arPill.className='ar-pill off'; arPillText.textContent='Mode Manual (AR gagal dimuat)';
+  }
+}
+function startDetectLoop(){
+  if(detectLoopId) return;
+  const loop = async ()=>{
+    if(video.readyState===4 && cocoModel){
+      try{
+        const preds = await cocoModel.detect(video);
+        drawPredictions(preds);
+      }catch(e){}
+    }
+    detectLoopId = requestAnimationFrame(loop);
+  };
+  detectLoopId = requestAnimationFrame(loop);
+}
+function stopDetectLoop(){ if(detectLoopId){ cancelAnimationFrame(detectLoopId); detectLoopId=null; } detectChip.classList.remove('show'); currentDetection=null; }
+
+function drawPredictions(preds){
+  const cw = overlayCanvas.clientWidth, ch = overlayCanvas.clientHeight;
+  if(overlayCanvas.width!==cw) overlayCanvas.width=cw;
+  if(overlayCanvas.height!==ch) overlayCanvas.height=ch;
+  const ctx = overlayCanvas.getContext('2d');
+  ctx.clearRect(0,0,cw,ch);
+  const vw=video.videoWidth, vh=video.videoHeight;
+  if(!vw||!vh) return;
+  const scale = Math.min(cw/vw, ch/vh);
+  const offX=(cw-vw*scale)/2, offY=(ch-vh*scale)/2;
+  let best=null;
+  preds.forEach(p=>{
+    if(!COCO_TO_DB[p.class] || p.score<0.55) return;
+    if(!best || p.score>best.score) best=p;
+    const [x,y,w,h]=p.bbox;
+    const rx=x*scale+offX, ry=y*scale+offY, rw=w*scale, rh=h*scale;
+    ctx.strokeStyle='#6FE3A0'; ctx.lineWidth=2.5; ctx.strokeRect(rx,ry,rw,rh);
+    const label = COCO_TO_DB[p.class].name;
+    ctx.font='600 11px Inter, sans-serif';
+    const tw = ctx.measureText(label).width+14;
+    ctx.fillStyle='rgba(20,71,44,0.9)'; ctx.fillRect(rx, Math.max(0,ry-22), tw, 20);
+    ctx.fillStyle='#fff'; ctx.fillText(label, rx+7, Math.max(14,ry-7));
+  });
+  if(best){
+    currentDetection = COCO_TO_DB[best.class];
+    detectChip.innerHTML = `&#128269; Terdeteksi: ${currentDetection.name} &mdash; Ketuk untuk analisis`;
+    detectChip.classList.add('show');
+  }else{
+    currentDetection=null;
+    detectChip.classList.remove('show');
+  }
+}
+detectChip.addEventListener('click', ()=>{
+  if(!currentDetection) return;
+  captureFrame();
+  goToConfirm();
+  pickFood(currentDetection);
+});
+
+document.getElementById('btnCapture').addEventListener('click', ()=>{
+  if(mediaStream) captureFrame(); else lastCapturedDataUrl=null;
+  goToConfirm();
+});
+function captureFrame(){
+  const w=video.videoWidth||480, h=video.videoHeight||640;
+  hiddenCanvas.width=w; hiddenCanvas.height=h;
+  hiddenCanvas.getContext('2d').drawImage(video,0,0,w,h);
+  lastCapturedDataUrl = hiddenCanvas.toDataURL('image/jpeg',0.85);
+}
+function placeholderSVG(){
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><rect width="100%" height="100%" fill="#F1F4EE"/><text x="50%" y="50%" fill="#2F9B5D" font-family="Inter" font-size="13" text-anchor="middle">Tanpa foto</text></svg>`);
+}
+
+/* ---------- Confirm / search ---------- */
+function goToConfirm(){
+  selectedFood=null;
+  document.getElementById('selectedFoodBox').style.display='none';
+  document.getElementById('btnAnalyze').disabled=true;
+  document.getElementById('searchInput2').value='';
+  document.getElementById('suggestList2').innerHTML='';
+  document.getElementById('confirmImg').src = lastCapturedDataUrl || placeholderSVG();
+  document.getElementById('wrap-home').style.display='none';
+  ['scan','confirm','result','history','edu'].forEach(s=> document.getElementById('screen-'+s).classList.toggle('active', s==='confirm'));
+}
+function renderSuggestions(query, listEl, onPick){
+  listEl.innerHTML=''; const q=query.trim().toLowerCase(); if(q.length===0) return;
+  const matches = FOOD_DB.filter(f=> f.name.toLowerCase().includes(q) || f.kw.some(k=>k.includes(q))).slice(0,6);
+  if(matches.length===0){ listEl.innerHTML=`<div class="suggest-item" style="cursor:default;"><span class="si-name" style="color:var(--text-mute);">Tidak ditemukan di database demo</span></div>`; return; }
+  matches.forEach(f=>{
+    const div=document.createElement('div'); div.className='suggest-item';
+    div.innerHTML=`<span class="si-name">${f.name}</span><span class="si-tag tag-${f.cat}">${f.cat}</span>`;
+    div.addEventListener('click', ()=> onPick(f));
+    listEl.appendChild(div);
+  });
+}
+document.getElementById('searchInput').addEventListener('input', e=>{
+  renderSuggestions(e.target.value, document.getElementById('suggestList'), (food)=>{
+    lastCapturedDataUrl=null; document.getElementById('searchInput').value=''; document.getElementById('suggestList').innerHTML='';
+    goToConfirm(); pickFood(food);
+  });
+});
+document.getElementById('searchInput2').addEventListener('input', e=> renderSuggestions(e.target.value, document.getElementById('suggestList2'), pickFood));
+function pickFood(food){
+  selectedFood=food;
+  document.getElementById('selectedFoodBox').style.display='block';
+  document.getElementById('selectedFoodName').textContent=food.name;
+  document.getElementById('btnAnalyze').disabled=false;
+  document.getElementById('suggestList2').innerHTML='';
+  document.getElementById('searchInput2').value=food.name;
+}
+document.getElementById('btnAnalyze').addEventListener('click', ()=>{
+  if(!selectedFood) return;
+  const time = new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+  renderResult(selectedFood, lastCapturedDataUrl, time);
+  history.unshift({food:selectedFood, img:lastCapturedDataUrl, time});
+  renderHistoryList();
+  document.getElementById('wrap-home').style.display='none';
+  ['scan','confirm','result','history','edu'].forEach(s=> document.getElementById('screen-'+s).classList.toggle('active', s==='result'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+});
+
+/* ---------- Result render ---------- */
+function tagNutri(kind,v){
+  const rule={kcal:[250,500],fat:[10,20],satfat:[5,10],sugar:[5,15],sodium:[300,600],protein:[10,20]}[kind];
+  if(v>rule[1]) return 'Tinggi'; if(v>=rule[0]) return 'Sedang'; return 'Rendah';
+}
+function renderResult(food,img,time){
+  document.getElementById('resultThumb').src = img||placeholderSVG();
+  document.getElementById('resultName').textContent = food.name;
+  document.getElementById('resultTime').textContent = time||'';
+  const band=document.getElementById('riskBand'); band.className='risk-band b-'+food.cat;
+  document.getElementById('riskLabelText').textContent = CAT_LABEL[food.cat];
+  const circumference=144.5, pct=(food.level/4)*100;
+  const ring=document.getElementById('resultRing');
+  ring.setAttribute('stroke-dasharray',`${(pct/100)*circumference} ${circumference}`);
+  ring.setAttribute('stroke', CAT_COLOR[food.cat]);
+  document.getElementById('resultRingVal').textContent = `${food.level}/4`;
+
+  const n=food.nutrition;
+  if(n){
+    const rows=[
+      ['Kalori', Math.round(n.kcal)+' kkal', tagNutri('kcal',n.kcal)],
+      ['Lemak Total', n.fat+' g', tagNutri('fat',n.fat)],
+      ['Lemak Jenuh', n.satfat+' g', tagNutri('satfat',n.satfat)],
+      ['Gula', n.sugar+' g', tagNutri('sugar',n.sugar)],
+      ['Natrium', n.sodium+' mg', tagNutri('sodium',n.sodium)],
+      ['Protein', n.protein+' g', tagNutri('protein',n.protein)]
+    ];
+    document.getElementById('nutriRows').innerHTML = rows.map(r=>{
+      const tagCls = r[2]==='Tinggi'?'tag-tinggi':r[2]==='Sedang'?'tag-sedang':'tag-rendah';
+      return `<div class="nt-row"><span class="nt-name">${r[0]}</span><span class="nt-right"><span class="nt-val">${r[1]}</span><span class="si-tag ${tagCls}">${r[2]}</span></span></div>`;
+    }).join('');
+  }else{
+    document.getElementById('nutriRows').innerHTML = `<div class="nt-row" style="border-top:none;"><span class="nt-name" style="font-style:italic;">Data nutrisi rinci belum tersedia untuk item demo ini.</span></div>`;
+  }
+
+  document.getElementById('resultMechanism').textContent = food.mechanism;
+  document.getElementById('resultAlt').innerHTML = food.alt;
+  window._lastFoodLevel = food.level;
+  maybeShowNutriSwitch(food, n);
+  renderDampak(food.cat,'wanita');
+  document.querySelectorAll('#panel-dampak .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.sub==='wanita'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-ringkasan').classList.add('active');
+  document.querySelectorAll('#screen-result > .app-body > .tabs > .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.panel==='ringkasan'));
+  window._currentResultCat = food.cat;
+}
+function renderDampak(cat, who){
+  const d = DAMPAK[cat][who];
+  const heading = cat==='rendah' ? {short:'Manfaat Jangka Pendek', long:'Manfaat Jangka Panjang'} : {short:'Dampak Jangka Pendek', long:'Dampak Jangka Panjang'};
+  document.getElementById('dampakContent').innerHTML = `
+    <div class="info-block" style="margin-bottom:10px;"><h4>${heading.short}</h4><ul>${d.short.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="info-block" style="margin-bottom:10px;"><h4>${heading.long}</h4><ul>${d.long.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="info-block rec"><h4>Rekomendasi</h4><p>${DAMPAK[cat].rekomendasi}</p></div>`;
+}
+/* tab switching (top-level result tabs + dampak sub tabs) */
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  if(btn.dataset.panel){
+    const parent = btn.closest('.app-body');
+    parent.querySelectorAll(':scope > .tabs > .tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    parent.querySelectorAll(':scope > .tab-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
+  }
+  if(btn.dataset.sub){
+    btn.parentElement.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDampak(window._currentResultCat, btn.dataset.sub);
+  }
+});
+
+/* ---------- History list (Riwayat Bulanan: 30 hari terakhir) ---------- */
+function monthlyHistory(){
+  const cutoff = Date.now() - 30*24*60*60*1000;
+  return history.filter(h => !h.ts || h.ts >= cutoff);
+}
+function renderHistoryList(){
+  const list=document.getElementById('historyList'), empty=document.getElementById('historyEmpty');
+  list.innerHTML='';
+  const monthly = monthlyHistory();
+  document.getElementById('historyCount').textContent = monthly.length ? monthly.length+' item' : '';
+  if(monthly.length===0){ empty.style.display='block'; return; } empty.style.display='none';
+  monthly.forEach(h=>{
+    const div=document.createElement('div'); div.className='history-item';
+    div.innerHTML=`<img src="${h.img||placeholderSVG()}"><div style="flex:1;"><div class="hi-name">${h.food.name}</div><div class="hi-time">${h.time}</div></div><span class="si-tag tag-${h.food.cat}">${h.food.cat}</span>`;
+    div.addEventListener('click', ()=>{ renderResult(h.food,h.img,h.time); showTab('result'); });
+    list.appendChild(div);
+  });
+}
+
+/* ---------- Grafik Tren Kesehatan Vaskulo-Reproduksi ---------- */
+function renderTrendChart(){
+  const wrap = document.getElementById('trendChartWrap');
+  const data = monthlyHistory().slice().reverse(); // urut kronologis
+  if(data.length<2){
+    wrap.innerHTML = `<div class="trend-empty">Scan minimal 2 makanan agar grafik tren dapat ditampilkan.</div>`;
+    return;
+  }
+  const w=320, h=110, pad=14;
+  const maxLevel=4, minLevel=1;
+  const stepX = (w-2*pad)/(data.length-1);
+  const healthY = lvl => h-pad - ((maxLevel-lvl)/(maxLevel-minLevel))*(h-2*pad);
+  let points = data.map((d,i)=> `${pad+i*stepX},${healthY(d.food.level)}`).join(' ');
+  let dots = data.map((d,i)=> `<circle cx="${pad+i*stepX}" cy="${healthY(d.food.level)}" r="3.5" fill="${CAT_COLOR[d.food.cat]}"/>`).join('');
+  wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;">
+    <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#E8E5D9" stroke-width="1"/>
+    <polyline points="${points}" fill="none" stroke="#2F9B5D" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+  </svg>
+  <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--text-mute);margin-top:2px;"><span>Semakin rendah skor, semakin baik kondisi kesehatan pembuluh darah dan kesehatan reproduksi.</span></div>`;
+}
+
+/* ---------- Nutri-Switch Strategy popup ---------- */
+const NUTRI_SWITCH_ITEMS = [
+  {name:"Kacang-kacangan & biji labu", desc:"Sumber L-arginin alami yang membantu tubuh memproduksi nitrat oksida untuk melebarkan kembali pembuluh darah (vasodilatasi)."},
+  {name:"Ikan berlemak (salmon, kembung)", desc:"Omega-3 membantu menurunkan peradangan pada dinding pembuluh darah akibat natrium/lemak jenuh berlebih."},
+  {name:"Buah beri & jeruk", desc:"Kaya antioksidan (vitamin C, polifenol) yang menetralkan stres oksidatif dari makanan tinggi garam/lemak."},
+  {name:"Sayuran hijau & bit", desc:"Mengandung nitrat alami yang juga berkontribusi pada relaksasi otot pembuluh darah."}
+];
+function maybeShowNutriSwitch(food, n){
+  const highSodium = n && n.sodium>600;
+  const highSatFat = n && n.satfat>10;
+  const highCat = food.cat==='tinggi' || food.cat==='ekstrem';
+  if(!(highSodium || highSatFat || highCat)) return;
+  const listEl = document.getElementById('nutriSwitchList');
+  listEl.innerHTML = NUTRI_SWITCH_ITEMS.map(it=>`
+    <div class="switch-item">
+      <div class="si-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M12 2C7 2 4 6 4 10c0 5 4 9 8 12 4-3 8-7 8-12 0-4-3-8-8-8Z"/></svg></div>
+      <div><div class="si-title">${it.name}</div><div class="si-desc">${it.desc}</div></div>
+    </div>`).join('');
+  document.getElementById('nutriSwitchOverlay').classList.add('show');
+}
+
+/* ---------- Visualisasi 3D Pembuluh Darah (three.js) ---------- */
+/* ---- Visual Vaskular (SVG statis + zoom/pan, mengikuti gaya ilustrasi medis) ---- */
+let vascInited=false;
+let vascZoom=1, vascPanX=0, vascPanY=0;
+let vDrag={active:false,x:0,y:0};
+let vPinch={active:false,dist:0,startZoom:1};
+const vPointers = new Map();
+let vFlowPathEl=null, vFlowSeeds=[], vFlowSpeed=1;
+
+function initVascular3D(){ initVascularVisual(); } // nama lama dipertahankan agar showTab() tetap kompatibel
+function initVascularVisual(){
+  if(vascInited) return;
+  vascInited = true;
+  vFlowPathEl = document.getElementById('vesselTrunk');
+  const dotsF = document.querySelectorAll('#flowDotsF circle');
+  const dotsM = document.querySelectorAll('#flowDotsM circle');
+  vFlowSeeds = { f: Array.from(dotsF, ()=> Math.random()), m: Array.from(dotsM, ()=> Math.random()) };
+  document.getElementById('vascSlider').addEventListener('input', e=> updateVascularState(parseInt(e.target.value)));
+  initVascZoomEvents();
+  animateVascularFlow();
+  updateVascularState(0);
+}
+
+/* animasi partikel darah menyusuri batang pembuluh utama, lalu bercabang ke sistem wanita & pria */
+function animateVascularFlow(){
+  requestAnimationFrame(animateVascularFlow);
+  if(!vFlowPathEl) return;
+  const trunkLen = vFlowPathEl.getTotalLength();
+  const femalePath = document.getElementById('vesselFemaleMain');
+  const malePath = document.getElementById('vesselMaleMain');
+  const femaleLen = femalePath.getTotalLength();
+  const maleLen = malePath.getTotalLength();
+  const t = performance.now()*0.001*vFlowSpeed;
+
+  const runDots = (dots, seeds, branchPath, branchLen)=>{
+    const totalLen = trunkLen + branchLen;
+    dots.forEach((dot,i)=>{
+      const frac = (seeds[i] + t*0.14) % 1;
+      const dist = frac*totalLen;
+      let pt;
+      if(dist <= trunkLen){ pt = vFlowPathEl.getPointAtLength(dist); }
+      else{ pt = branchPath.getPointAtLength(dist-trunkLen); }
+      dot.setAttribute('cx', pt.x);
+      dot.setAttribute('cy', pt.y);
+    });
+  };
+  runDots(document.querySelectorAll('#flowDotsF circle'), vFlowSeeds.f, femalePath, femaleLen);
+  runDots(document.querySelectorAll('#flowDotsM circle'), vFlowSeeds.m, malePath, maleLen);
+}
+
+/* ---- kontrol zoom & pan (pinch, drag, wheel, tombol) ---- */
+function applyVascTransform(){
+  const svg = document.getElementById('vascSvg');
+  svg.style.transform = `translate(${vascPanX}px, ${vascPanY}px) scale(${vascZoom})`;
+  document.getElementById('vascZoomPct').textContent = Math.round(vascZoom*100)+'%';
+}
+function vascZoomBy(delta){
+  vascZoom = Math.min(3, Math.max(1, +(vascZoom+delta).toFixed(2)));
+  if(vascZoom===1){ vascPanX=0; vascPanY=0; }
+  applyVascTransform();
+}
+function initVascZoomEvents(){
+  const stage = document.getElementById('vascZoomStage');
+  stage.addEventListener('pointerdown', e=>{
+    stage.setPointerCapture(e.pointerId);
+    vPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(vPointers.size===1){
+      vDrag.active=true; vDrag.x=e.clientX; vDrag.y=e.clientY;
+      stage.classList.add('dragging');
+    }else if(vPointers.size===2){
+      vDrag.active=false;
+      const pts=[...vPointers.values()];
+      vPinch.active=true;
+      vPinch.dist=Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+      vPinch.startZoom=vascZoom;
+    }
+  });
+  stage.addEventListener('pointermove', e=>{
+    if(!vPointers.has(e.pointerId)) return;
+    vPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(vPinch.active && vPointers.size===2){
+      const pts=[...vPointers.values()];
+      const dist=Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+      vascZoom = Math.min(3, Math.max(1, vPinch.startZoom*(dist/vPinch.dist)));
+      if(vascZoom===1){ vascPanX=0; vascPanY=0; }
+      applyVascTransform();
+    }else if(vDrag.active && vascZoom>1){
+      vascPanX += (e.clientX-vDrag.x);
+      vascPanY += (e.clientY-vDrag.y);
+      vDrag.x=e.clientX; vDrag.y=e.clientY;
+      applyVascTransform();
+    }
+  });
+  const endPtr = e=>{
+    vPointers.delete(e.pointerId);
+    if(vPointers.size<2) vPinch.active=false;
+    if(vPointers.size===0){ vDrag.active=false; stage.classList.remove('dragging'); }
+  };
+  stage.addEventListener('pointerup', endPtr);
+  stage.addEventListener('pointercancel', endPtr);
+  stage.addEventListener('pointerleave', endPtr);
+  stage.addEventListener('wheel', e=>{ e.preventDefault(); vascZoomBy(e.deltaY<0?0.15:-0.15); }, {passive:false});
+  stage.addEventListener('dblclick', ()=> vascZoom>1 ? vascZoomBy(-vascZoom+1) : vascZoomBy(1));
+}
+
+/* ---- state penyempitan / sumbatan pembuluh, digerakkan oleh slider ---- */
+function updateVascularState(pct){
+  document.getElementById('vascSlider').value = pct;
+  document.getElementById('vascPctLabel').textContent = pct+'%';
+
+  const t = pct/100;
+  const healthy = {r:0xD6,g:0x58,b:0x4B}, plaque = {r:0x8B,g:0x5E,b:0x3C};
+  const mixHex = (a,b,f)=>{
+    const r=Math.round(a.r+(b.r-a.r)*f), g=Math.round(a.g+(b.g-a.g)*f), bl=Math.round(a.b+(b.b-a.b)*f);
+    return '#'+[r,g,bl].map(v=>v.toString(16).padStart(2,'0')).join('');
+  };
+  const vesselColor = mixHex(healthy, plaque, t);
+
+  // batang & seluruh cabang (wanita + pria) menyempit (stroke-width) dan berubah warna
+  const trunk=document.getElementById('vesselTrunk');
+  trunk.setAttribute('stroke-width', 9 - t*5);
+  trunk.setAttribute('stroke', vesselColor);
+  [['vesselFemaleMain',7,4],['vesselFemaleLeft',5,3],['vesselFemaleRight',5,3],
+   ['vesselMaleMain',7,4],['vesselMaleLeft',5,3],['vesselMaleRight',5,3]].forEach(([id,base,shrink])=>{
+    const el=document.getElementById(id);
+    el.setAttribute('stroke-width', base - t*shrink);
+    el.setAttribute('stroke', vesselColor);
+  });
+
+  // plak lemak: muncul & membesar bertahap di kedua sisi (wanita & pria)
+  document.querySelectorAll('.plaque-blob').forEach((el,i)=>{
+    const threshold = 0.14 + (i%3)*0.14;
+    const growth = Math.max(0, Math.min(1, (t-threshold)/0.35));
+    el.setAttribute('opacity', growth);
+    el.setAttribute('rx', 2.5 + growth*3.2);
+    el.setAttribute('ry', 5 + growth*6);
+  });
+  const plaqueOn = t>0.24 ? Math.min(1,(t-0.24)/0.2) : 0;
+  document.getElementById('labelPlaqueF').setAttribute('opacity', plaqueOn);
+  document.getElementById('labelPlaqueM').setAttribute('opacity', plaqueOn);
+
+  // sumbatan vaskular di persentase tinggi (satu di sisi wanita, satu di sisi pria)
+  const clotGrowth = Math.max(0, Math.min(1,(t-0.78)/0.2));
+  ['clotBlobF','clotBlobM'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.setAttribute('r', clotGrowth*9);
+    el.setAttribute('opacity', clotGrowth);
+  });
+  document.getElementById('labelClotF').setAttribute('opacity', clotGrowth>0.15?clotGrowth:0);
+  document.getElementById('labelClotM').setAttribute('opacity', clotGrowth>0.15?clotGrowth:0);
+
+  // jaringan kapiler & mikrosirkulasi memudar
+  const capOpacity = Math.max(0.15, 1 - t*0.85);
+  document.getElementById('capillaryNetF').setAttribute('opacity', capOpacity);
+  document.getElementById('capillaryNetM').setAttribute('opacity', capOpacity);
+  const microOn = t>0.5 ? Math.min(1,(t-0.5)/0.25) : 0;
+  document.getElementById('labelMicroF').setAttribute('opacity', microOn);
+  document.getElementById('labelMicroM').setAttribute('opacity', microOn);
+
+  // organ (rahim, ovarium, prostat, testis) tampak makin "kekurangan darah" saat perfusi menurun
+  ['perfUterus','perfOvaryL','perfOvaryR','perfProstate','perfTestisL','perfTestisR'].forEach(id=>{
+    document.getElementById(id).setAttribute('opacity', t*0.5);
+  });
+
+  // kecepatan & opasitas aliran darah menurun
+  vFlowSpeed = Math.max(0.08, 1 - t*0.85);
+  const flowOpacity = Math.max(0.25, 1 - t*0.6);
+  document.getElementById('flowDotsF').setAttribute('opacity', flowOpacity);
+  document.getElementById('flowDotsM').setAttribute('opacity', flowOpacity);
+
+  const badge=document.getElementById('vascStageBadge'), title=document.getElementById('vascStageTitle'), desc=document.getElementById('vascStageDesc');
+  if(pct<25){
+    badge.textContent='Sehat'; badge.style.background='var(--green-tag)';
+    title.textContent='Pembuluh darah dalam kondisi lentur & terbuka';
+    desc.textContent='Aliran darah menuju ginjal, kandung kemih, dan organ reproduksi berjalan lancar tanpa hambatan berarti.';
+  }else if(pct<55){
+    badge.textContent='Mulai Menyempit'; badge.style.background='var(--amber)';
+    title.textContent='Endotel mulai terganggu, pembuluh mulai menyempit';
+    desc.textContent='Konsumsi fast food yang mulai sering memicu peradangan ringan pada dinding pembuluh darah sehingga elastisitasnya berkurang.';
+  }else if(pct<80){
+    badge.textContent='Tersumbat Sebagian'; badge.style.background='var(--orange)';
+    title.textContent='Plak lemak menumpuk, aliran darah melambat';
+    desc.textContent='Endapan lemak mulai mempersempit lumen pembuluh darah, mengurangi pasokan oksigen & nutrisi ke jaringan urologi-reproduksi.';
+  }else{
+    badge.textContent='Risiko Tinggi'; badge.style.background='var(--red)';
+    title.textContent='Penyempitan signifikan, aliran darah sangat terhambat';
+    desc.textContent='Pada tingkat konsumsi setinggi ini, suplai darah ke ginjal, kandung kemih, dan organ reproduksi menjadi sangat terbatas &mdash; mendukung mekanisme di balik risiko yang dijelaskan pada tab Dampak Reproduksi.';
+  }
+}
+function goToVascularFromResult(){
+  showTab('edu');
+  setTimeout(()=>{
+    const lvl = window._lastFoodLevel||1;
+    const pctByLevel = {1:10, 2:35, 3:65, 4:90};
+    updateVascularState(pctByLevel[lvl]||10);
+  }, 60);
+}
+
+/* ---------- Pencarian Nutrisi via Open Food Facts API ---------- */
+let offDebounce=null;
+function catFromNutrition(kcal,fat,satfat,sugar,sodium){
+  let score=0;
+  if(satfat>10) score+=2; else if(satfat>5) score+=1;
+  if(sodium>600) score+=2; else if(sodium>300) score+=1;
+  if(sugar>15) score+=1;
+  if(score>=4) return {cat:'ekstrem',level:4};
+  if(score>=2) return {cat:'tinggi',level:3};
+  if(score>=1) return {cat:'sedang',level:2};
+  return {cat:'rendah',level:1};
+}
+async function searchOpenFoodFacts(query){
+  try{
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=5`;
+    const res = await fetch(url);
+    if(!res.ok) return [];
+    const data = await res.json();
+    return (data.products||[]).filter(p=>p.product_name).slice(0,5).map(p=>{
+      const nu=p.nutriments||{};
+      const kcal=nu['energy-kcal_100g']||0, fat=nu['fat_100g']||0, satfat=nu['saturated-fat_100g']||0,
+            sugar=nu['sugars_100g']||0, sodium=(nu['sodium_100g']||0)*1000, protein=nu['proteins_100g']||0;
+      const c = catFromNutrition(kcal,fat,satfat,sugar,sodium);
+      return {
+        name: p.product_name+' (per 100g, via Open Food Facts)', cat:c.cat, level:c.level, kw:[],
+        nutrition:{kcal,fat:Math.round(fat*10)/10,satfat:Math.round(satfat*10)/10,sugar:Math.round(sugar*10)/10,sodium:Math.round(sodium),protein:Math.round(protein*10)/10},
+        mechanism: c.cat==='rendah' ? 'Berdasarkan data nutrisi daring, item ini relatif rendah natrium & lemak jenuh sehingga risiko terhadap kesehatan vaskulo-reproduksi tergolong minim.' : 'Berdasarkan data nutrisi daring, kandungan natrium dan/atau lemak jenuh pada item ini berpotensi berkontribusi pada peradangan pembuluh darah bila dikonsumsi rutin.',
+        alt:'Bandingkan dengan alternatif segar/minim olahan untuk porsi natrium & lemak jenuh yang lebih rendah.',
+        _fromApi:true
+      };
+    });
+  }catch(e){ return []; }
+}
+function renderSuggestionsAPI(query, listEl, onPick){
+  if(offDebounce) clearTimeout(offDebounce);
+  const q=query.trim(); if(q.length<3) return;
+  offDebounce = setTimeout(async ()=>{
+    const apiResults = await searchOpenFoodFacts(q);
+    if(apiResults.length===0) return;
+    const apiWrap=document.createElement('div');
+    apiWrap.innerHTML = `<div style="font-size:9.5px;color:var(--text-mute);margin:6px 2px 2px;">Hasil basis data nutrisi daring</div>`;
+    apiResults.forEach(f=>{
+      const div=document.createElement('div'); div.className='suggest-item';
+      div.innerHTML=`<span class="si-name">${f.name}</span><span class="si-tag tag-${f.cat}">API</span>`;
+      div.addEventListener('click', ()=> onPick(f));
+      apiWrap.appendChild(div);
+    });
+    listEl.appendChild(apiWrap);
+  }, 500);
+}
+
+/* init */
+renderHome();
+</script>
+</body>
+</html>
