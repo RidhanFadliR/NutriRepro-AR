@@ -306,7 +306,7 @@ body{
 .trend-card .tc-head span{ font-size:10px; color:var(--text-mute); }
 .trend-empty{ text-align:center; padding:20px 10px; font-size:11.5px; color:var(--text-mute); }
 
-@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; } .viewfinder{ aspect-ratio:auto; flex:1; min-height:0; } #screen-scan.active{ display:flex; } }
+@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; height:100dvh; max-height:100vh; max-height:100dvh; max-width:100%; } .viewfinder{ aspect-ratio:auto; flex:none; min-height:55vh; } #screen-scan.active{ display:flex; } .bottom-nav{ padding-bottom:env(safe-area-inset-bottom); } }
 </style>
 </head>
 <body>
@@ -982,12 +982,26 @@ function showTab(tab){
     document.getElementById('screen-'+s).classList.toggle('active', s===tab);
   });
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  if(tab==='scan') startCameraFlow(); else stopDetectLoop();
+  if(tab==='scan'){ startCameraFlow(); setTimeout(fitViewfinder,50); } else stopDetectLoop();
   if(tab==='home') renderHome();
   if(tab==='edu'){ renderEdu(); initVascular3D(); }
   if(tab==='artikel') renderArtikel();
   if(tab==='history') renderTrendChart();
 }
+function fitViewfinder(){
+  const vf=document.getElementById('viewfinder');
+  const screenScan=document.getElementById('screen-scan');
+  if(!vf || !screenScan || !screenScan.classList.contains('active')) return;
+  if(window.innerWidth>600){ vf.style.height=''; return; }
+  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  let used=0;
+  Array.from(screenScan.children).forEach(ch=>{ if(ch!==vf) used += ch.offsetHeight; });
+  used += Math.max(0, screenScan.children.length-1) * 14;
+  vf.style.height = Math.max(240, vh-used) + 'px';
+}
+window.addEventListener('resize', fitViewfinder);
+if(window.visualViewport) window.visualViewport.addEventListener('resize', fitViewfinder);
+window.addEventListener('orientationchange', ()=> setTimeout(fitViewfinder,300));
 function goToScan(){ showTab('scan'); }
 document.querySelectorAll('.nav-btn').forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
 
