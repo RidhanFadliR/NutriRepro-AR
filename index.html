@@ -306,7 +306,7 @@ body{
 .trend-card .tc-head span{ font-size:10px; color:var(--text-mute); }
 .trend-empty{ text-align:center; padding:20px 10px; font-size:11.5px; color:var(--text-mute); }
 
-@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; height:100dvh; max-height:100vh; max-height:100dvh; max-width:100%; } .viewfinder{ aspect-ratio:auto; flex:none; min-height:55vh; } #screen-scan.active{ display:flex; } .bottom-nav{ padding-bottom:env(safe-area-inset-bottom); } }
+@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; } .viewfinder{ aspect-ratio:auto; flex:1; min-height:0; } #screen-scan.active{ display:flex; } }
 </style>
 </head>
 <body>
@@ -398,7 +398,7 @@ body{
       <input type="text" class="search-input" id="searchInput" placeholder="Ketik nama makanan&hellip;">
       <div class="suggest-list" id="suggestList"></div>
     </div>
-    <div class="disclaimer"><b>Mode AR terbatas:</b> deteksi otomatis hanya mengenali beberapa kategori objek umum (mis. pizza, donat, sandwich, buah, sayur). Untuk makanan lain, gunakan pencarian manual untuk konfirmasi sebelum dianalisis.</div>
+    <div class="disclaimer"><b>Instruksi:</b> Deteksi otomatis hanya mengenali beberapa kategori objek makanan umum, seperti pizza, donat, sandwich, buah, dan sayur. Untuk makanan di luar kategori tersebut, gunakan pencarian manual untuk mengonfirmasi nama makanan sebelum dianalisis.</div>
   </div>
 
   <!-- ============ CONFIRM ============ -->
@@ -478,7 +478,7 @@ body{
             <li>WHO &mdash; Reproductive Health &amp; Nutrition Guidance</li>
             <li>American Society for Reproductive Medicine (ASRM) &mdash; materi edukasi gizi &amp; kesuburan</li>
           </ul>
-          <p style="margin-top:8px;">Konten ini merupakan ringkasan edukatif atas tema yang umum dibahas pada sumber-sumber di atas, bukan kutipan studi tunggal dengan angka klinis presisi.</p>
+          <p style="margin-top:8px;">Konten ini merupakan ringkasan edukatif yang disusun dari berbagai sumber ilmiah dan tidak mewakili hasil satu studi klinis tertentu.</p>
         </div>
       </div>
       <button class="btn btn-ghost btn-block" onclick="showTab('scan')">Scan Makanan Lain</button>
@@ -802,13 +802,6 @@ const FOOD_DB = [
    nutrition:{kcal:41,fat:0.2,satfat:0,sugar:5,sodium:69,protein:1},
    mechanism:"Beta-karoten mendukung produksi hormon reproduksi dan kesehatan lapisan sel secara umum.",
    alt:"Baik dikonsumsi mentah sebagai camilan atau campuran salad." },
-
- /* ===== 79 makanan & minuman Indonesia tambahan =====
-    Kategori kualitatif mengikuti tema yang sama (lemak trans/gorengan, daging olahan
-    nitrat, gula rafinasi/HFCS, natrium-MSG-BPA). Mekanisme & rekomendasi memakai teks
-    template per subkategori karena 79 nilai gizi presisi per item tidak dapat diverifikasi
-    satu per satu — nutrition sengaja dikosongkan (bukan dikarang) untuk item-item ini. */
-
  // -- Ekstrem: gorengan / lemak trans --
  { name:"Cireng", cat:"ekstrem", level:4, kw:["cireng"], mechanism:MK.gorengan, alt:AL.gorengan },
  { name:"Cimol", cat:"ekstrem", level:4, kw:["cimol"], mechanism:MK.gorengan, alt:AL.gorengan },
@@ -872,43 +865,107 @@ const FOOD_DB = [
  { name:"Petis Kemasan", cat:"sedang", level:2, kw:["petis kemasan"], mechanism:MK.natrium, alt:AL.natrium },
 
  // -- Rendah: protein/lemak sehat --
- { name:"Tempe Kukus", cat:"rendah", level:1, kw:["tempe kukus"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Tahu Kukus", cat:"rendah", level:1, kw:["tahu kukus"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Ikan Kembung Bakar", cat:"rendah", level:1, kw:["ikan kembung","kembung bakar"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Ikan Nila Panggang", cat:"rendah", level:1, kw:["ikan nila","nila panggang"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Ayam Kampung Rebus", cat:"rendah", level:1, kw:["ayam kampung rebus","ayam rebus"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Telur Rebus", cat:"rendah", level:1, kw:["telur rebus"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Tempe Bacem Kukus", cat:"rendah", level:1, kw:["tempe bacem"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Kacang Tanah Rebus", cat:"rendah", level:1, kw:["kacang rebus","kacang tanah rebus"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Edamame Rebus", cat:"rendah", level:1, kw:["edamame"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Yogurt Plain Tanpa Gula", cat:"rendah", level:1, kw:["yogurt plain","yogurt tawar"], mechanism:MK.proteinSehat, alt:AL.rendah },
- { name:"Susu Kedelai Tanpa Gula", cat:"rendah", level:1, kw:["susu kedelai"], mechanism:MK.proteinSehat, alt:AL.rendah },
+{ name:"Tempe Kukus", cat:"rendah", level:1, kw:["tempe kukus"],
+   nutrition:{kcal:201,fat:8.8,satfat:1.3,sugar:1,sodium:10,protein:20.8},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Tahu Kukus", cat:"rendah", level:1, kw:["tahu kukus"],
+   nutrition:{kcal:80,fat:4.7,satfat:0.7,sugar:0.5,sodium:10,protein:10.9},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Ikan Kembung Bakar", cat:"rendah", level:1, kw:["ikan kembung","kembung bakar"],
+   nutrition:{kcal:125,fat:3,satfat:1,sugar:0,sodium:85,protein:21},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Ikan Nila Panggang", cat:"rendah", level:1, kw:["ikan nila","nila panggang"],
+   nutrition:{kcal:128,fat:3,satfat:1,sugar:0,sodium:70,protein:26},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Ayam Kampung Rebus", cat:"rendah", level:1, kw:["ayam kampung rebus","ayam rebus"],
+   nutrition:{kcal:150,fat:4,satfat:1.1,sugar:0,sodium:70,protein:27},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Telur Rebus", cat:"rendah", level:1, kw:["telur rebus"],
+   nutrition:{kcal:78,fat:5.3,satfat:1.6,sugar:0.5,sodium:62,protein:6.3},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Tempe Bacem Kukus", cat:"rendah", level:1, kw:["tempe bacem"],
+   nutrition:{kcal:225,fat:9,satfat:1.5,sugar:5,sodium:190,protein:18},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Kacang Tanah Rebus", cat:"rendah", level:1, kw:["kacang rebus","kacang tanah rebus"],
+   nutrition:{kcal:180,fat:14,satfat:2,sugar:2,sodium:5,protein:7.8},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Edamame Rebus", cat:"rendah", level:1, kw:["edamame"],
+   nutrition:{kcal:121,fat:5,satfat:0.6,sugar:2,sodium:6,protein:11},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Yogurt Plain Tanpa Gula", cat:"rendah", level:1, kw:["yogurt plain","yogurt tawar"],
+   nutrition:{kcal:61,fat:3.3,satfat:2.1,sugar:4.7,sodium:36,protein:3.5},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
+ { name:"Susu Kedelai Tanpa Gula", cat:"rendah", level:1, kw:["susu kedelai"],
+   nutrition:{kcal:33,fat:1.8,satfat:0.2,sugar:1,sodium:51,protein:3.3},
+   mechanism:MK.proteinSehat, alt:AL.rendah },
  // -- Rendah: sayur --
  { name:"Sayur Bening Bayam", cat:"rendah", level:1, kw:["sayur bening bayam","bayam bening"], mechanism:MK.sayur, alt:AL.rendah },
  { name:"Sayur Asem", cat:"rendah", level:1, kw:["sayur asem"], mechanism:MK.sayur, alt:AL.rendah },
  { name:"Pecel Sayur", cat:"rendah", level:1, kw:["pecel"], mechanism:MK.sayur, alt:AL.rendah },
- { name:"Gado-gado (tanpa gorengan)", cat:"rendah", level:1, kw:["gado-gado","gado gado"], mechanism:MK.sayur, alt:AL.rendah },
- { name:"Ubi Jalar Kukus", cat:"rendah", level:1, kw:["ubi kukus","ubi jalar kukus"], mechanism:MK.sayur, alt:AL.rendah },
- { name:"Jagung Rebus", cat:"rendah", level:1, kw:["jagung rebus"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Gado-gado (tanpa gorengan)", cat:"rendah", level:1, kw:["gado-gado","gado gado"],
+   nutrition:{kcal:500,fat:22,satfat:4,sugar:6,sodium:520,protein:20},
+   mechanism:MK.sayur, alt:AL.rendah },
+{ name:"Ubi Jalar Kukus", cat:"rendah", level:1, kw:["ubi kukus","ubi jalar kukus"],
+   nutrition:{kcal:86,fat:0.1,satfat:0,sugar:4.2,sodium:6,protein:1.6},
+   mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Jagung Rebus", cat:"rendah", level:1, kw:["jagung rebus"],
+   nutrition:{kcal:96,fat:1.5,satfat:0.2,sugar:4.5,sodium:15,protein:3.4},
+   mechanism:MK.sayur, alt:AL.rendah },
  { name:"Sup Sayur Bening", cat:"rendah", level:1, kw:["sup sayur","sop sayur"], mechanism:MK.sayur, alt:AL.rendah },
  { name:"Salad Sayur Segar", cat:"rendah", level:1, kw:["salad sayur","salad segar"], mechanism:MK.sayur, alt:AL.rendah },
+ { name:"Nasi Megono", cat:"tinggi", level:3, kw:["nasi megono","megono"], cocoLabel:"rice",
+  nutrition:{kcal:380,fat:8,satfat:1,sugar:4,sodium:420,protein:10},
+  mechanism:"Mengandung karbohidrat sebagai sumber energi, serta nangka muda dan kelapa parut yang menyumbang serat dan beberapa vitamin.",
+  alt:"Lebih baik dikonsumsi dengan porsi seimbang dan ditambah lauk berprotein tanpa banyak minyak." },
+{ name:"Garang Asem", cat:"rendah", level:1, kw:["garang asem","garang asem ayam"], cocoLabel:"chicken",
+  nutrition:{kcal:220,fat:8,satfat:2,sugar:3,sodium:350,protein:24},
+  mechanism:"Kaya protein dari ayam dan memiliki kuah berbumbu rempah yang relatif rendah lemak bila tidak menggunakan santan berlebihan.",
+  alt:"Pilihan menu yang baik dipadukan dengan nasi secukupnya dan sayuran." },
+{ name:"Kluban", cat:"rendah", level:1, kw:["kluban","urap pekalongan"], cocoLabel:"salad",
+  nutrition:{kcal:170,fat:7,satfat:2,sugar:5,sodium:180,protein:5},
+  mechanism:"Berisi aneka sayuran yang kaya serat, vitamin, dan mineral untuk mendukung pola makan yang lebih seimbang.",
+  alt:"Cocok dijadikan menu pendamping atau makan siang dengan tambahan sumber protein." },
+{ name:"Tauto Pekalongan", cat:"sedang", level:2, kw:["tauto","tauto pekalongan"], cocoLabel:"soup",
+  nutrition:{kcal:300,fat:9,satfat:2,sugar:4,sodium:650,protein:18},
+  mechanism:"Mengandung protein dari daging dan karbohidrat dari lontong atau nasi, namun kuah berbumbu cenderung mengandung natrium lebih tinggi.",
+  alt:"Nikmati secukupnya dan imbangi dengan sayuran serta air putih." },
  // -- Rendah: buah --
- { name:"Pepaya", cat:"rendah", level:1, kw:["pepaya"], mechanism:MK.buah, alt:AL.rendah },
- { name:"Semangka", cat:"rendah", level:1, kw:["semangka"], mechanism:MK.buah, alt:AL.rendah },
- { name:"Mangga", cat:"rendah", level:1, kw:["mangga"], mechanism:MK.buah, alt:AL.rendah },
- { name:"Pisang Rebus", cat:"rendah", level:1, kw:["pisang rebus"], mechanism:MK.buah, alt:AL.rendah },
- { name:"Air Kelapa Muda", cat:"rendah", level:1, kw:["air kelapa","kelapa muda"], mechanism:MK.buah, alt:AL.rendah },
+ { name:"Pepaya", cat:"rendah", level:1, kw:["pepaya"],
+   nutrition:{kcal:43,fat:0.3,satfat:0,sugar:7.8,sodium:3,protein:0.5},
+   mechanism:MK.buah, alt:AL.rendah },
+ { name:"Semangka", cat:"rendah", level:1, kw:["semangka"],
+   nutrition:{kcal:30,fat:0.2,satfat:0,sugar:6.2,sodium:1,protein:0.6},
+   mechanism:MK.buah, alt:AL.rendah },
+ { name:"Mangga", cat:"rendah", level:1, kw:["mangga"],
+   nutrition:{kcal:60,fat:0.3,satfat:0.1,sugar:14,sodium:1,protein:0.6},
+   mechanism:MK.buah, alt:AL.rendah },
+ { name:"Pisang Rebus", cat:"rendah", level:1, kw:["pisang rebus"],
+   nutrition:{kcal:122,fat:0.3,satfat:0,sugar:15,sodium:2,protein:1.2},
+   mechanism:MK.buah, alt:AL.rendah },
+ { name:"Air Kelapa Muda", cat:"rendah", level:1, kw:["air kelapa","kelapa muda"],
+   nutrition:{kcal:19,fat:0.2,satfat:0.2,sugar:2.6,sodium:105,protein:0.7},
+   mechanism:MK.buah, alt:AL.rendah },
 
  /* ===== 33 makanan khas Indonesia tambahan (nasi campur, berkuah, bersantan, camilan sehat) ===== */
 
  // -- Ekstrem: bersantan kental / gorengan berat / daging sangat berlemak --
- { name:"Rendang Daging", cat:"ekstrem", level:4, kw:["rendang","rendang daging","rendang sapi"], mechanism:MK.santan, alt:AL.santan },
- { name:"Nasi Padang (Rendang & Gulai)", cat:"ekstrem", level:4, kw:["nasi padang"], mechanism:MK.santan, alt:AL.santan },
+ { name:"Rendang Daging", cat:"ekstrem", level:4, kw:["rendang","rendang daging","rendang sapi"],
+   nutrition:{kcal:193,fat:12,satfat:7,sugar:2,sodium:450,protein:20},
+   mechanism:MK.santan, alt:AL.santan },
+ { name:"Nasi Padang (Rendang & Gulai)", cat:"ekstrem", level:4, kw:["nasi padang"],
+   nutrition:{kcal:700,fat:28,satfat:12,sugar:3,sodium:1250,protein:30},
+   mechanism:MK.santan, alt:AL.santan },
  { name:"Batagor", cat:"ekstrem", level:4, kw:["batagor"], mechanism:MK.gorengan, alt:AL.gorengan },
  { name:"Sate Kambing", cat:"ekstrem", level:4, kw:["sate kambing"], mechanism:MK.lemakDaging, alt:AL.lemakDaging },
 
  // -- Tinggi: santan sedang, gorengan ringan, kuah kental/berlemak --
  { name:"Nasi Goreng", cat:"tinggi", level:3, kw:["nasi goreng","fried rice"], mechanism:MK.natrium, alt:AL.natrium },
+ { name:"Mie Ayam", cat:"sedang", level:2, kw:["mie ayam","mi ayam"],
+   nutrition:{kcal:421,fat:18.7,satfat:2.4,sugar:1.3,sodium:36,protein:16.7},
+   mechanism:MK.natrium, alt:AL.natrium },
+   { name:"Seblak", cat:"tinggi", level:3, kw:["seblak"],
+   nutrition:{kcal:320,fat:12,satfat:4,sugar:2,sodium:850,protein:7},
+   mechanism:MK.natrium, alt:AL.natrium },
  { name:"Mie Goreng", cat:"tinggi", level:3, kw:["mie goreng","mi goreng"], mechanism:MK.natrium, alt:AL.natrium },
  { name:"Gulai Ayam", cat:"tinggi", level:3, kw:["gulai ayam","gulai"], mechanism:MK.santan, alt:AL.santan },
  { name:"Opor Ayam", cat:"tinggi", level:3, kw:["opor ayam","opor"], mechanism:MK.santan, alt:AL.santan },
@@ -943,15 +1000,23 @@ const FOOD_DB = [
  { name:"Capcay Rebus", cat:"rendah", level:1, kw:["capcay","cap cay"], mechanism:MK.sayur, alt:AL.rendah },
  { name:"Tumis Kangkung", cat:"rendah", level:1, kw:["tumis kangkung","kangkung"], mechanism:MK.sayur, alt:AL.rendah },
  { name:"Roti Tawar Gandum", cat:"rendah", level:1, kw:["roti gandum","roti tawar gandum","whole wheat bread"],
+   nutrition:{kcal:69,fat:1,satfat:0.2,sugar:1.5,sodium:132,protein:3.6},
    mechanism:"Serat pada gandum utuh memperlambat penyerapan gula darah dibanding tepung olahan biasa, membantu menjaga kestabilan kadar insulin.", alt:AL.rendah },
  { name:"Oatmeal Plain", cat:"rendah", level:1, kw:["oatmeal","oat"],
+   nutrition:{kcal:71,fat:1.5,satfat:0.3,sugar:0.5,sodium:4,protein:2.5},
    mechanism:"Kandungan beta-glukan pada oat membantu menstabilkan gula darah dan mendukung sensitivitas insulin yang berkaitan dengan keteraturan ovulasi.", alt:AL.rendah },
  { name:"Nasi Merah", cat:"rendah", level:1, kw:["nasi merah","beras merah"],
+   nutrition:{kcal:110,fat:0.8,satfat:0.2,sugar:0.4,sodium:3,protein:2.3},
    mechanism:"Serat dan indeks glikemik yang lebih rendah dibanding nasi putih membantu menjaga kestabilan gula darah dan sensitivitas insulin.", alt:AL.rendah },
- { name:"Kopi Hitam Tanpa Gula", cat:"rendah", level:1, kw:["kopi hitam","americano","kopi tanpa gula"], mechanism:MK.netral, alt:AL.rendah },
- { name:"Teh Tawar", cat:"rendah", level:1, kw:["teh tawar","teh pahit"], mechanism:MK.netral, alt:AL.rendah },
- { name:"Kacang Hijau Rebus", cat:"rendah", level:1, kw:["kacang hijau","kacang hijau rebus"], mechanism:MK.proteinSehat, alt:AL.rendah }
-];
+ { name:"Kopi Hitam Tanpa Gula", cat:"rendah", level:1, kw:["kopi hitam","americano","kopi tanpa gula"],
+   nutrition:{kcal:2,fat:0,satfat:0,sugar:0,sodium:5,protein:0.3},
+   mechanism:MK.netral, alt:AL.rendah },
+ { name:"Teh Tawar", cat:"rendah", level:1, kw:["teh tawar","teh pahit"],
+   nutrition:{kcal:2,fat:0,satfat:0,sugar:0,sodium:7,protein:0},
+   mechanism:MK.netral, alt:AL.rendah },
+ { name:"Kacang Hijau Rebus", cat:"rendah", level:1, kw:["kacang hijau","kacang hijau rebus"],
+   nutrition:{kcal:105,fat:0.4,satfat:0.1,sugar:2,sodium:2,protein:7},
+   mechanism:MK.proteinSehat, alt:AL.rendah }];
 const CAT_LABEL = { ekstrem:"Risiko Ekstrem", tinggi:"Risiko Tinggi", sedang:"Risiko Sedang", rendah:"Ramah Kesuburan" };
 const CAT_COLOR = { ekstrem:"#D6584B", tinggi:"#E38A34", sedang:"#D4A02F", rendah:"#2F9B5D" };
 const COCO_TO_DB = {}; FOOD_DB.forEach(f=>{ if(f.cocoLabel) COCO_TO_DB[f.cocoLabel]=f; });
@@ -982,35 +1047,12 @@ function showTab(tab){
     document.getElementById('screen-'+s).classList.toggle('active', s===tab);
   });
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  if(tab==='scan'){ startCameraFlow(); setTimeout(fitViewfinder,50); } else stopDetectLoop();
+  if(tab==='scan') startCameraFlow(); else stopDetectLoop();
   if(tab==='home') renderHome();
   if(tab==='edu'){ renderEdu(); initVascular3D(); }
   if(tab==='artikel') renderArtikel();
   if(tab==='history') renderTrendChart();
 }
-function fitViewfinder(){
-  const vf=document.getElementById('viewfinder');
-  const screenScan=document.getElementById('screen-scan');
-  if(!vf || !screenScan || !screenScan.classList.contains('active')) return;
-  if(window.innerWidth>600){ vf.style.height=''; return; }
-  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
-  let used=0;
-  Array.from(screenScan.children).forEach(ch=>{ if(ch!==vf) used += ch.offsetHeight; });
-  used += Math.max(0, screenScan.children.length-1) * 14;
-  vf.style.height = Math.max(240, vh-used) + 'px';
-}
-function fitFrame(){
-  const frame=document.querySelector('.frame');
-  if(!frame) return;
-  if(window.innerWidth>440){ frame.style.height=''; return; }
-  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
-  frame.style.height = vh + 'px';
-  fitViewfinder();
-}
-window.addEventListener('resize', fitFrame);
-if(window.visualViewport) window.visualViewport.addEventListener('resize', fitFrame);
-window.addEventListener('orientationchange', ()=> setTimeout(fitFrame,300));
-fitFrame();
 function goToScan(){ showTab('scan'); }
 document.querySelectorAll('.nav-btn').forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
 
@@ -1051,8 +1093,8 @@ function renderEdu(){
   const topics=[
     {t:"Apa itu PCOS?", b:"Polycystic Ovary Syndrome (PCOS) adalah gangguan hormon yang umum pada usia reproduktif, sering berkaitan dengan resistensi insulin. Pola makan rendah gula rafinasi dan lemak trans dapat membantu mengelola gejalanya.", q:"resistensi insulin"},
     {t:"Peran Antioksidan bagi Kesuburan", b:"Antioksidan seperti vitamin C, E, dan zinc membantu melindungi sel telur dan sperma dari kerusakan akibat stres oksidatif, yang dapat dipicu oleh polusi, rokok, dan makanan olahan.", q:"antioksidan"},
-    {t:"Pola Makan Anti-Inflamasi", b:"Pola makan tinggi sayur, buah, ikan berlemak, dan kacang-kacangan dikaitkan dengan peradangan tubuh yang lebih rendah, yang mendukung fungsi hormon reproduksi yang lebih stabil.", q:"diet mediterania"},
-    {t:"Gula Rafinasi & Resistensi Insulin", b:"Konsumsi gula rafinasi berlebih dapat memicu lonjakan insulin berulang. Seiring waktu, ini berkaitan dengan resistensi insulin, salah satu faktor yang mendasari gangguan ovulasi.", q:"gula"},
+    {t:"Makanan Penurun Kualitas Sperma", b:"Daging olahan, makanan tinggi lemak trans, produk kedelai, dan produk susu tinggi lemak dikaitkan dengan penurunan jumlah serta motilitas sperma. Pola makan ini sejalan dengan mekanisme yang sama: peradangan pembuluh darah akibat lemak jenuh & pengawet turut menghambat aliran darah ke organ reproduksi pria.", q:"kualitas sperma"},
+    {t:"Makanan Pemicu Batu Ginjal", b:"Konsumsi garam, protein hewani, dan gula berlebih dapat meningkatkan kadar mineral dalam urine yang memicu terbentuknya kristal batu ginjal. Karena ginjal juga bagian dari jalur vaskular yang sama dengan organ reproduksi, menjaga asupan natrium tetap penting untuk kesehatan keduanya.", q:"batu ginjal"},
     {t:"Jalur Pembuluh Darah: Dari Piring ke Organ Reproduksi", b:"Natrium dan lemak jenuh berlebih dapat mengganggu lapisan dalam pembuluh darah (endotel) sehingga elastisitasnya berkurang. Karena ginjal, kandung kemih, dan organ reproduksi sangat bergantung pada aliran darah mikro yang lancar, gangguan pada endotel ini ikut menghambat suplai oksigen &amp; nutrisi ke jaringan tersebut &mdash; inilah dasar dari animasi di bagian atas halaman ini.", q:"endotel"},
     {t:"L-Arginin & Antioksidan sebagai Penawar", b:"L-arginin adalah asam amino yang tubuh ubah menjadi nitrat oksida (NO), senyawa yang membantu otot pembuluh darah relaksasi (vasodilatasi). Sumber alaminya antara lain kacang-kacangan, ikan, dan biji labu. Dipadukan dengan antioksidan dari buah &amp; sayur berwarna, kombinasi ini menjadi dasar rekomendasi pada fitur Nutri-Switch setiap kali makanan tinggi garam/lemak terdeteksi.", q:"vasodilatasi"}
   ];
@@ -1093,6 +1135,48 @@ const ARTIKEL_DATA=[
     href:'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10018037/', source:'PMC',
     kw:['ginjal','natrium','garam','penyakit ginjal kronis','pgk','urologi','kandung kemih']
   },
+  {
+  cat:'Kesuburan Wanita',
+  title:'Polycystic Ovarian Syndrome (PCOS)',
+  desc:'Alodokter menjelaskan PCOS sebagai gangguan hormon kronis yang terkait erat dengan resistensi insulin dan kelebihan produksi androgen, sehingga menyebabkan siklus menstruasi tidak teratur dan menurunkan kesuburan.',
+  href:'https://www.alodokter.com/pcos', source:'Alodokter',
+  kw:['pcos','sindrom ovarium polikistik','resistensi insulin','hormon','menstruasi','kesuburan wanita']
+},
+{
+  cat:'Antioksidan & Kesuburan',
+  title:'Manfaat Antioksidan bagi Kesuburan',
+  desc:'Morula IVF memaparkan bagaimana antioksidan seperti vitamin C, E, selenium, dan zinc melindungi sperma dan sel telur dari stres oksidatif, sekaligus mendukung keseimbangan hormon reproduksi seperti estrogen dan progesteron.',
+  href:'https://www.morulaivf.co.id/id/blog/manfaat-antioksidan-bagi-kesuburan/', source:'Morula IVF',
+  kw:['antioksidan','vitamin c','vitamin e','zinc','stres oksidatif','sperma','sel telur','kesuburan']
+},
+{
+  cat:'Kesuburan Pria',
+  title:'Waspada, 4 Makanan yang Menurunkan Kualitas Sperma',
+  desc:'Halodoc (ditinjau dr. Rizal Fadli) memaparkan bahwa daging olahan, makanan tinggi lemak trans, produk kedelai, dan produk susu tinggi lemak berpotensi menurunkan jumlah serta motilitas sperma pada pria yang sedang menjalani program hamil.',
+  href:'https://www.halodoc.com/artikel/waspada-4-makanan-yang-menurunkan-kualitas-sperma', source:'Halodoc',
+  kw:['sperma','daging olahan','lemak trans','kedelai','susu tinggi lemak','motilitas sperma','kesuburan pria']
+},
+{
+  cat:'Gizi Remaja & Obesitas',
+  title:'The Effect of Food Diversity, Junk Food, and High Sugar Products on Overnutrition in Adolescents (SMAN 6 Depok)',
+  desc:'Studi observasional Amerta Nutrition (UNAIR) pada 112 remaja SMAN 6 Depok meneliti hubungan keragaman pangan, konsumsi junk food, dan produk tinggi gula terhadap kejadian gizi lebih. Hasilnya, pada sampel tersebut tidak ditemukan hubungan yang signifikan secara statistik antar variabel tersebut.',
+  href:'https://e-journal.unair.ac.id/AMNT/article/view/63139', source:'Amerta Nutrition (UNAIR)',
+  kw:['junk food','gula','remaja','gizi lebih','obesitas','keragaman pangan','overnutrition']
+},
+{
+  cat:'Urologi / Ginjal',
+  title:'Hindari 4 Makanan yang Memicu Batu Ginjal',
+  desc:'Halodoc merangkum makanan tinggi oksalat, garam, protein hewani, serta vitamin C berlebih sebagai faktor risiko pembentukan batu ginjal yang perlu dibatasi porsinya.',
+  href:'https://www.halodoc.com/artikel/hindari-4-makanan-yang-memicu-batu-ginjal', source:'Halodoc',
+  kw:['batu ginjal','oksalat','garam','protein hewani','vitamin c','ginjal']
+},
+{
+  cat:'Urologi / Ginjal',
+  title:'Deretan Makanan dan Minuman Pemicu Batu Ginjal',
+  desc:'Klikdokter memaparkan tujuh pemicu batu ginjal, mulai dari garam, protein hewani, minuman bersoda, makanan kaleng, gula, hingga karbohidrat murni yang meningkatkan kadar mineral dalam urine.',
+  href:'https://www.klikdokter.com/info-sehat/ginjal-saluran-kemih/deretan-makanan-dan-minuman-pemicu-batu-ginjal', source:'Klikdokter',
+  kw:['batu ginjal','garam','minuman bersoda','makanan kaleng','gula','karbohidrat','ginjal']
+},
   {
     cat:'Intervensi Diet',
     title:'Effects of Mediterranean Diet on Endothelial Reactivity',
@@ -1331,7 +1415,7 @@ function goToConfirm(){
 function renderSuggestions(query, listEl, onPick){
   listEl.innerHTML=''; const q=query.trim().toLowerCase(); if(q.length===0) return;
   const matches = FOOD_DB.filter(f=> f.name.toLowerCase().includes(q) || f.kw.some(k=>k.includes(q))).slice(0,6);
-  if(matches.length===0){ listEl.innerHTML=`<div class="suggest-item" style="cursor:default;"><span class="si-name" style="color:var(--text-mute);">Tidak ditemukan di database demo</span></div>`; return; }
+  if(matches.length===0){ listEl.innerHTML=`<div class="suggest-item" style="cursor:default;"><span class="si-name" style="color:var(--text-mute);">Tidak ditemukan di database</span></div>`; return; }
   matches.forEach(f=>{
     const div=document.createElement('div'); div.className='suggest-item';
     div.innerHTML=`<span class="si-name">${f.name}</span><span class="si-tag tag-${f.cat}">${f.cat}</span>`;
@@ -1397,7 +1481,7 @@ function renderResult(food,img,time){
       return `<div class="nt-row"><span class="nt-name">${r[0]}</span><span class="nt-right"><span class="nt-val">${r[1]}</span><span class="si-tag ${tagCls}">${r[2]}</span></span></div>`;
     }).join('');
   }else{
-    document.getElementById('nutriRows').innerHTML = `<div class="nt-row" style="border-top:none;"><span class="nt-name" style="font-style:italic;">Data nutrisi rinci belum tersedia untuk item demo ini.</span></div>`;
+    document.getElementById('nutriRows').innerHTML = `<div class="nt-row" style="border-top:none;"><span class="nt-name" style="font-style:italic;">Data nutrisi rinci belum tersedia untuk item ini.</span></div>`;
   }
 
   document.getElementById('resultMechanism').textContent = food.mechanism;
