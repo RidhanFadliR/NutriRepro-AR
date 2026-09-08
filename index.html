@@ -40,19 +40,20 @@
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-/* Mencegah zoom tidak sengaja (double-tap / pinch) di seluruh aplikasi -- beberapa browser
-   modern (mis. iOS Safari terbaru) mengabaikan "maximum-scale" di meta viewport, jadi
-   touch-action di sini jadi lapisan pencegah kedua yang lebih konsisten. Area diagram
-   pembuluh darah (.vasc-zoom-stage) tetap bisa di-zoom lewat kontrol +/- & pinch khususnya,
-   karena elemen itu punya touch-action:none sendiri yang menimpa aturan ini. */
-html,body{ touch-action:pan-x pan-y; }
+/* Kunci body ke ukuran layar & matikan scroll di level halaman -- semua scroll yang benar
+   terjadi di dalam .app-body (dan kontainer scroll lain di dalam .frame), jadi halaman
+   luar TIDAK PERNAH ikut ke-scroll/geser lagi walau tinggi .frame meleset dikit dari
+   viewport (hal umum di HP karena address bar). overscroll-behavior:none juga mematikan
+   efek "pantul" (rubber-band) khas Safari yang sering kerasa seperti tampilan "geser sendiri".
+   touch-action:pan-x pan-y mematikan gesture pinch-zoom & double-tap-zoom bawaan browser,
+   tapi tetap mengizinkan gestur geser/scroll normal. */
+html,body{ height:100%; overflow:hidden; overscroll-behavior:none; touch-action:pan-x pan-y; }
 body{
-  min-height:100vh;
   background:#EDEAE0;
   font-family:'Inter',sans-serif;
   color:var(--text);
-  display:flex; align-items:flex-start; justify-content:center;
-  padding:26px 14px 60px;
+  display:flex; align-items:center; justify-content:center;
+  padding:26px 14px;
 }
 .mono{font-family:'IBM Plex Mono',monospace;}
 .display{font-family:'Nunito',sans-serif;}
@@ -65,6 +66,7 @@ body{
   height:min(820px, 100vh); max-height:100vh; position:relative;
 }
 @supports (height: 100svh){ .frame{ height:min(820px, 100svh); max-height:100svh; } }
+@supports (height: 100dvh){ .frame{ height:min(820px, 100dvh); max-height:100dvh; } }
 
 /* header */
 .app-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px 16px; }
@@ -332,6 +334,7 @@ body{
   body{ padding:0; }
   .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; }
   @supports (height: 100svh){ .frame{ height:100svh; max-height:100svh; } }
+  @supports (height: 100dvh){ .frame{ height:100dvh; max-height:100dvh; } }
   .viewfinder{ min-height:0; }
   #screen-scan.active{ display:flex; }
 }
@@ -758,6 +761,21 @@ function loadArLibs(){
 }
 </script>
 <script>
+/* ================= Anti-zoom (lapisan JS, di luar CSS/meta viewport) ================= */
+// Beberapa browser (terutama Chrome di Android) tetap memicu zoom lewat gesture double-tap
+// atau pinch dua jari walau CSS touch-action & meta viewport sudah diatur. Blok manual di sini
+// supaya benar-benar tidak ada bagian tampilan yang "meloncat" zoom tanpa disengaja.
+document.addEventListener('gesturestart', e=> e.preventDefault()); // pinch-zoom khas Safari/iOS
+document.addEventListener('gesturechange', e=> e.preventDefault());
+let _lastTapTime = 0;
+document.addEventListener('touchend', function(e){
+  if(e.target.closest && e.target.closest('.vasc-zoom-stage')) return; // area diagram pembuluh darah punya double-tap zoom sendiri, jangan diblok
+  const now = Date.now();
+  if(now - _lastTapTime <= 300){ e.preventDefault(); } // cegah double-tap-zoom
+  _lastTapTime = now;
+}, { passive:false });
+document.addEventListener('wheel', function(e){ if(e.ctrlKey) e.preventDefault(); }, { passive:false }); // pinch-zoom trackpad di desktop
+
 /* ================= Data ================= */
 // Kategori kualitatif 1-4 (Rendah/Sedang/Tinggi/Ekstrem) berbasis tema literatur gizi-endokrin
 // (lemak trans, gula rafinasi/HFCS, nitrat pengawet, natrium/MSG/BPA). Nutrisi = estimasi rata-rata publik per porsi umum, bukan hasil pengukuran foto.
