@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>NUTRIREPRO-AR</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
@@ -40,6 +40,12 @@
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
+/* Mencegah zoom tidak sengaja (double-tap / pinch) di seluruh aplikasi -- beberapa browser
+   modern (mis. iOS Safari terbaru) mengabaikan "maximum-scale" di meta viewport, jadi
+   touch-action di sini jadi lapisan pencegah kedua yang lebih konsisten. Area diagram
+   pembuluh darah (.vasc-zoom-stage) tetap bisa di-zoom lewat kontrol +/- & pinch khususnya,
+   karena elemen itu punya touch-action:none sendiri yang menimpa aturan ini. */
+html,body{ touch-action:pan-x pan-y; }
 body{
   min-height:100vh;
   background:#EDEAE0;
