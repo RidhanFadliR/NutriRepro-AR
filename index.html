@@ -28,6 +28,12 @@
   --amber-bg:#FBF1D9;
   --green-tag:#2F9B5D;
   --green-tag-bg:#E3F2E7;
+  --blue:#3B78C4;
+  --blue-bg:#E3EEFB;
+  --violet:#7C5CD9;
+  --violet-bg:#ECE6FB;
+  --pink:#C7527E;
+  --pink-bg:#FBE6EE;
   --radius-lg:26px;
   --radius-md:16px;
   --radius-sm:10px;
@@ -49,8 +55,10 @@ body{
   width:100%; max-width:420px; background:var(--bg);
   border:1px solid rgba(0,0,0,0.06); border-radius:var(--radius-lg);
   box-shadow:0 40px 70px -30px rgba(20,40,25,0.4);
-  overflow:hidden; display:flex; flex-direction:column; height:820px; max-height:100vh; position:relative;
+  overflow:hidden; display:flex; flex-direction:column;
+  height:min(820px, 100vh); max-height:100vh; position:relative;
 }
+@supports (height: 100svh){ .frame{ height:min(820px, 100svh); max-height:100svh; } }
 
 /* header */
 .app-header{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px 16px; }
@@ -122,6 +130,10 @@ body{
 .quick-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .quick-item{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px 12px; display:flex; flex-direction:column; gap:8px; cursor:pointer; }
 .quick-item .qi-icon{ width:34px; height:34px; border-radius:10px; background:var(--green-100); display:flex; align-items:center; justify-content:center; }
+.quick-item .qi-icon.violet{ background:var(--violet-bg); }
+.quick-item .qi-icon.blue{ background:var(--blue-bg); }
+.quick-item .qi-icon.amber{ background:var(--amber-bg); }
+.quick-item .qi-icon.pink{ background:var(--pink-bg); }
 .quick-item span{ font-size:12px; font-weight:700; line-height:1.25; }
 
 /* ---- Scan screen ---- */
@@ -168,7 +180,8 @@ body{
 .suggest-list{ display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height:200px; overflow-y:auto; }
 .suggest-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 13px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-sm); cursor:pointer; }
 .suggest-item:hover{ border-color:var(--green-600); }
-.si-name{ font-size:13px; font-weight:600; }
+.si-name{ font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.si-emoji{ font-size:16px; }
 .si-tag{ font-size:9.5px; text-transform:uppercase; letter-spacing:0.4px; padding:3px 8px; border-radius:999px; font-weight:700; }
 .tag-ekstrem{ background:var(--red-bg); color:var(--red); }
 .tag-tinggi{ background:var(--orange-bg); color:var(--orange); }
@@ -307,7 +320,29 @@ body{
 .trend-card .tc-head span{ font-size:10px; color:var(--text-mute); }
 .trend-empty{ text-align:center; padding:20px 10px; font-size:11.5px; color:var(--text-mute); }
 
-@media (max-width:440px){ body{ padding:0; } .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; } .viewfinder{ min-height:0; } #screen-scan.active{ display:flex; } }
+@media (max-width:440px){
+  body{ padding:0; }
+  .frame{ border-radius:0; height:100vh; max-height:100vh; max-width:100%; }
+  @supports (height: 100svh){ .frame{ height:100svh; max-height:100svh; } }
+  .viewfinder{ min-height:0; }
+  #screen-scan.active{ display:flex; }
+}
+@media (max-width:360px){
+  .app-body{ padding:0 14px 12px; }
+  .greet-card{ padding:15px 15px 17px; }
+  .summary-card{ padding:13px; gap:12px; }
+  .quick-item{ padding:11px 10px; }
+  .btn-block{ padding:11px 16px; font-size:12.5px; }
+}
+@media (max-height:700px){
+  .greet-card{ padding:13px 15px 15px; }
+  .app-body{ gap:10px; padding-bottom:10px; }
+  .viewfinder{ min-height:200px; }
+}
+@media (min-width:441px){
+  body{ padding:36px 14px 60px; }
+  .frame{ box-shadow:0 50px 90px -35px rgba(20,40,25,0.45); }
+}
 </style>
 </head>
 <body>
@@ -358,10 +393,10 @@ body{
 
       <div class="section-title"><h3>Layanan NutriRepro-AR</h3></div>
       <div class="quick-grid">
-        <div class="quick-item" onclick="showTab('edu')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><span>Edukasi Reproduksi</span></div>
-        <div class="quick-item" onclick="showTab('scan')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M12 2C7 2 4 6 4 10c0 5 4 9 8 12 4-3 8-7 8-12 0-4-3-8-8-8Z"/></svg></div><span>Rekomendasi Makanan</span></div>
-        <div class="quick-item" onclick="showTab('artikel')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><span>Artikel Ilmiah</span></div>
-        <div class="quick-item" onclick="showTab('history')"><div class="qi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E7A4A" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 4 5-8"/></svg></div><span>Grafik Tren Riwayat</span></div>
+        <div class="quick-item" onclick="showTab('edu')"><div class="qi-icon violet"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7C5CD9" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><span>Edukasi Reproduksi</span></div>
+        <div class="quick-item" onclick="showTab('scan')"><div class="qi-icon blue"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3B78C4" stroke-width="2"><path d="M12 2C7 2 4 6 4 10c0 5 4 9 8 12 4-3 8-7 8-12 0-4-3-8-8-8Z"/></svg></div><span>Rekomendasi Makanan</span></div>
+        <div class="quick-item" onclick="showTab('artikel')"><div class="qi-icon amber"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#D4A02F" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><span>Artikel Ilmiah</span></div>
+        <div class="quick-item" onclick="showTab('history')"><div class="qi-icon pink"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C7527E" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 4 5-8"/></svg></div><span>Grafik Tren Riwayat</span></div>
       </div>
     </div>
   </div>
@@ -1020,6 +1055,31 @@ const FOOD_DB = [
    mechanism:MK.proteinSehat, alt:AL.rendah }];
 const CAT_LABEL = { ekstrem:"Risiko Ekstrem", tinggi:"Risiko Tinggi", sedang:"Risiko Sedang", rendah:"Ramah Kesuburan" };
 const CAT_COLOR = { ekstrem:"#D6584B", tinggi:"#E38A34", sedang:"#D4A02F", rendah:"#2F9B5D" };
+const CAT_BG = { ekstrem:"#FBE7E4", tinggi:"#FCEEDC", sedang:"#FBF1D9", rendah:"#E3F2E7" };
+const FOOD_EMOJI_MAP = [
+ [['burger','sandwich'],'🍔'],[['gorengan','bakwan','gehu','tahu isi'],'🍤'],
+ [['ayam goreng','fried chicken','krispi','nugget'],'🍗'],[['donat','donut'],'🍩'],
+ [['sosis','hotdog','hot dog'],'🌭'],[['kue','cake','bolu'],'🍰'],
+ [['soda','cola','berkarbonasi'],'🥤'],[['boba','bubble tea','kopi kekinian','kopi susu'],'🧋'],
+ [['kopi hitam','americano'],'☕'],[['mie instan','indomie','mie ayam','mi ayam','mie goreng','mi goreng'],'🍜'],
+ [['pizza'],'🍕'],[['saus','sambal'],'🥫'],[['sarden','ikan kaleng'],'🥫'],
+ [['permen karet','gum'],'🍬'],[['alpukat','avocado'],'🥑'],[['salmon','ikan bakar'],'🐟'],
+ [['almond','walnut','kacang hijau','kacang almond'],'🥜'],[['pisang'],'🍌'],
+ [['apel','apple'],'🍎'],[['jeruk','orange'],'🍊'],[['brokoli','broccoli'],'🥦'],
+ [['wortel','carrot'],'🥕'],[['semangka'],'🍉'],[['mangga'],'🥭'],
+ [['air kelapa','kelapa muda'],'🥥'],[['rendang','gulai','opor','nasi padang','santan','nasi uduk'],'🍛'],
+ [['batagor','siomay'],'🥟'],[['sate'],'🍢'],[['nasi goreng','nasi merah','bubur ayam'],'🍚'],
+ [['seblak'],'🌶️'],[['sop buntut','sup buntut','bakso','soto','rawon'],'🍲'],
+ [['tahu goreng','tempe goreng','ayam goreng kampung'],'🍤'],[['ketoprak','rujak','capcay','cap cay','kangkung'],'🥗'],
+ [['telur dadar'],'🍳'],[['keju'],'🧀'],[['susu'],'🥛'],
+ [['roti gandum','roti tawar'],'🍞'],[['oatmeal','oat'],'🥣'],[['teh'],'🍵']
+];
+function foodEmoji(food){
+  if(!food) return '🍽️';
+  const hay=(food.name+' '+(food.kw||[]).join(' ')).toLowerCase();
+  for(const [keys,emo] of FOOD_EMOJI_MAP){ if(keys.some(k=>hay.includes(k))) return emo; }
+  return {ekstrem:'🍟',tinggi:'🍜',sedang:'🍲',rendah:'🥗'}[food.cat]||'🍽️';
+}
 const COCO_TO_DB = {}; FOOD_DB.forEach(f=>{ if(f.cocoLabel) COCO_TO_DB[f.cocoLabel]=f; });
 
 const DAMPAK = {
@@ -1067,7 +1127,7 @@ function renderHome(){
     history.slice(0,2).forEach(h=>{
       const div=document.createElement('div');
       div.className='mini-history'; div.style.marginBottom='8px';
-      div.innerHTML=`<img src="${h.img||placeholderSVG()}"><div style="flex:1;"><div class="mh-name">${h.food.name}</div><div class="mh-time">${h.time}</div></div><span class="si-tag tag-${h.food.cat}">${h.food.cat}</span>`;
+      div.innerHTML=`<img src="${h.img||placeholderSVG(h.food)}"><div style="flex:1;"><div class="mh-name">${h.food.name}</div><div class="mh-time">${h.time}</div></div><span class="si-tag tag-${h.food.cat}">${h.food.cat}</span>`;
       div.addEventListener('click', ()=>{ renderResult(h.food,h.img,h.time); showTab('result'); });
       recentWrap.appendChild(div);
     });
@@ -1398,8 +1458,10 @@ function captureFrame(){
   hiddenCanvas.getContext('2d').drawImage(video,0,0,w,h);
   lastCapturedDataUrl = hiddenCanvas.toDataURL('image/jpeg',0.85);
 }
-function placeholderSVG(){
-  return 'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><rect width="100%" height="100%" fill="#F1F4EE"/><text x="50%" y="50%" fill="#2F9B5D" font-family="Inter" font-size="13" text-anchor="middle">Tanpa foto</text></svg>`);
+function placeholderSVG(food){
+  const bg = food ? (CAT_BG[food.cat]||'#F1F4EE') : '#F1F4EE';
+  const emo = foodEmoji(food);
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><rect width="100%" height="100%" fill="${bg}"/><text x="50%" y="53%" font-size="130" text-anchor="middle" dominant-baseline="middle">${emo}</text></svg>`);
 }
 
 /* ---------- Confirm / search ---------- */
@@ -1419,7 +1481,7 @@ function renderSuggestions(query, listEl, onPick){
   if(matches.length===0){ listEl.innerHTML=`<div class="suggest-item" style="cursor:default;"><span class="si-name" style="color:var(--text-mute);">Tidak ditemukan di database</span></div>`; return; }
   matches.forEach(f=>{
     const div=document.createElement('div'); div.className='suggest-item';
-    div.innerHTML=`<span class="si-name">${f.name}</span><span class="si-tag tag-${f.cat}">${f.cat}</span>`;
+    div.innerHTML=`<span class="si-name"><span class="si-emoji">${foodEmoji(f)}</span>${f.name}</span><span class="si-tag tag-${f.cat}">${f.cat}</span>`;
     div.addEventListener('click', ()=> onPick(f));
     listEl.appendChild(div);
   });
@@ -1456,7 +1518,7 @@ function tagNutri(kind,v){
   if(v>rule[1]) return 'Tinggi'; if(v>=rule[0]) return 'Sedang'; return 'Rendah';
 }
 function renderResult(food,img,time){
-  document.getElementById('resultThumb').src = img||placeholderSVG();
+  document.getElementById('resultThumb').src = img||placeholderSVG(food);
   document.getElementById('resultName').textContent = food.name;
   document.getElementById('resultTime').textContent = time||'';
   const band=document.getElementById('riskBand'); band.className='risk-band b-'+food.cat;
@@ -1535,7 +1597,7 @@ function renderHistoryList(){
   if(monthly.length===0){ empty.style.display='block'; return; } empty.style.display='none';
   monthly.forEach(h=>{
     const div=document.createElement('div'); div.className='history-item';
-    div.innerHTML=`<img src="${h.img||placeholderSVG()}"><div style="flex:1;"><div class="hi-name">${h.food.name}</div><div class="hi-time">${h.time}</div></div><span class="si-tag tag-${h.food.cat}">${h.food.cat}</span>`;
+    div.innerHTML=`<img src="${h.img||placeholderSVG(h.food)}"><div style="flex:1;"><div class="hi-name">${h.food.name}</div><div class="hi-time">${h.time}</div></div><span class="si-tag tag-${h.food.cat}">${h.food.cat}</span>`;
     div.addEventListener('click', ()=>{ renderResult(h.food,h.img,h.time); showTab('result'); });
     list.appendChild(div);
   });
@@ -1825,7 +1887,7 @@ function renderSuggestionsAPI(query, listEl, onPick){
     apiWrap.innerHTML = `<div style="font-size:9.5px;color:var(--text-mute);margin:6px 2px 2px;">Hasil basis data nutrisi daring</div>`;
     apiResults.forEach(f=>{
       const div=document.createElement('div'); div.className='suggest-item';
-      div.innerHTML=`<span class="si-name">${f.name}</span><span class="si-tag tag-${f.cat}">API</span>`;
+      div.innerHTML=`<span class="si-name"><span class="si-emoji">${foodEmoji(f)}</span>${f.name}</span><span class="si-tag tag-${f.cat}">API</span>`;
       div.addEventListener('click', ()=> onPick(f));
       apiWrap.appendChild(div);
     });
