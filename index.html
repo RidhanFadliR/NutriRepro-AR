@@ -141,6 +141,8 @@ body{
 .ar-pill .dot{ width:7px; height:7px; border-radius:50%; background:#4ADE80; box-shadow:0 0 0 0 rgba(74,222,128,0.6); animation:pulse 1.8s infinite; }
 .ar-pill.loading .dot{ background:#E3B34A; animation:none; }
 .ar-pill.off .dot{ background:#9CA3A0; animation:none; }
+.ar-mode-toggle{ flex-shrink:0; background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.25); color:#EAF5EC; font-size:10.5px; font-weight:700; padding:6px 11px; border-radius:999px; cursor:pointer; font-family:'Inter',sans-serif; }
+.ar-mode-toggle.active{ background:#fff; color:var(--header); border-color:#fff; }
 @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(74,222,128,0.5);} 70%{box-shadow:0 0 0 7px rgba(74,222,128,0);} 100%{box-shadow:0 0 0 0 rgba(74,222,128,0);} }
 
 .viewfinder{ position:relative; width:100%; flex:1; min-height:260px; background:#0B1F14; overflow:hidden; }
@@ -408,7 +410,10 @@ body{
       <div class="tb-title">Scan Makanan</div>
       <button class="tb-btn" onclick="document.getElementById('scanTipsOverlay').classList.add('show')">&#9432;</button>
     </div>
-    <div style="padding:5px 18px 0; flex-shrink:0;"><div class="ar-pill loading" id="arPill"><span class="dot"></span><span id="arPillText">Memuat AR&hellip;</span></div></div>
+    <div style="padding:5px 18px 0; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+      <div class="ar-pill loading" id="arPill"><span class="dot"></span><span id="arPillText">Memuat AR&hellip;</span></div>
+      <button class="ar-mode-toggle" id="btnToggle2D" title="Alihkan ke mode 2D (tanpa deteksi otomatis, lebih ringan)">Mode 2D</button>
+    </div>
 
     <div class="viewfinder" id="viewfinder">
       <video id="video" autoplay playsinline muted></video>
@@ -693,6 +698,8 @@ body{
           <li>Jika makanan tidak termasuk kategori yang dikenali, gunakan kolom Cari Nama Makanan untuk pencarian manual.</li>
           <li>Pastikan nama makanan yang terdeteksi atau dipilih sudah sesuai sebelum menekan tombol Analisis Makanan.</li>
           <li>Jika kamera tidak dapat diakses, analisis makanan tetap dapat dilakukan melalui fitur pencarian manual.</li>
+          <li>Kamera dengan resolusi rendah dapat membuat deteksi otomatis kurang akurat atau terasa berat/lambat. Jika ini terjadi, ketuk tombol <b>Mode 2D</b> di pojok kanan atas untuk mematikan deteksi otomatis dan gunakan pencarian manual &mdash; hasil analisis nutrisinya tetap sama akuratnya.</li>
+          <li>Selalu periksa kembali nama makanan yang terdeteksi/dipilih di layar konfirmasi sebelum menekan Analisis Makanan, karena deteksi otomatis hanya perkiraan.</li>
         </ul>
       </div>
       <button class="btn btn-primary btn-block" onclick="document.getElementById('scanTipsOverlay').classList.remove('show')">Mengerti, Tutup</button>
@@ -721,22 +728,43 @@ body{
 
 <canvas id="hiddenCanvas" style="display:none;"></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+<script>
+/* Library AR (TensorFlow.js + coco-ssd) dimuat belakangan (lazy), hanya saat layar Scan pertama
+   kali dibuka. Ini menghemat kuota &amp; mempercepat loading awal aplikasi di jaringan/ponsel standar,
+   karena pengguna yang tidak pernah membuka fitur Scan tidak perlu mengunduh library ini sama sekali. */
+let arLibsPromise=null;
+function loadArLibs(){
+  if(arLibsPromise) return arLibsPromise;
+  arLibsPromise = new Promise((resolve,reject)=>{
+    const s1=document.createElement('script');
+    s1.src='https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js';
+    s1.onload=()=>{
+      const s2=document.createElement('script');
+      s2.src='https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js';
+      s2.onload=()=>resolve();
+      s2.onerror=()=>reject(new Error('coco-ssd gagal dimuat'));
+      document.body.appendChild(s2);
+    };
+    s1.onerror=()=>reject(new Error('tfjs gagal dimuat'));
+    document.body.appendChild(s1);
+  });
+  return arLibsPromise;
+}
+</script>
 <script>
 /* ================= Data ================= */
 // Kategori kualitatif 1-4 (Rendah/Sedang/Tinggi/Ekstrem) berbasis tema literatur gizi-endokrin
 // (lemak trans, gula rafinasi/HFCS, nitrat pengawet, natrium/MSG/BPA). Nutrisi = estimasi rata-rata publik per porsi umum, bukan hasil pengukuran foto.
 const MK = {
-  gorengan:"Digoreng berulang dalam minyak bersuhu tinggi sehingga terbentuk lemak trans yang meningkatkan peradangan sistemik dan resistensi insulin, faktor yang dapat mengganggu sumbu hipotalamus-hipofisis-gonad (HHG) dan siklus ovulasi.",
-  olahanDaging:"Kandungan nitrat/nitrit sebagai pengawet berasosiasi dengan pembentukan senyawa nitrosamin yang dapat memicu stres oksidatif dan berpotensi memengaruhi struktur DNA sperma.",
-  gula:"Gula rafinasi dan/atau HFCS yang tinggi memicu lonjakan glukosa-insulin berulang, berkaitan dengan resistensi insulin yang mendasari gangguan ovulasi pada kondisi seperti PCOS.",
-  natrium:"Kandungan natrium/MSG tinggi serta potensi paparan BPA dari kemasan berasosiasi dengan stres oksidatif ringan bila dikonsumsi rutin dalam jumlah besar.",
+  gorengan:"Digoreng berulang dalam minyak bersuhu tinggi sehingga terbentuk lemak trans (lemak hasil olahan yang paling berbahaya bagi pembuluh darah). Lemak ini memicu peradangan di seluruh tubuh dan resistensi insulin (kondisi saat tubuh jadi kurang peka terhadap hormon insulin sehingga gula darah sulit terkontrol) &mdash; dua hal yang dapat mengganggu sistem hormon otak-indung telur/testis (poros HHG) dan siklus ovulasi (pelepasan sel telur bulanan).",
+  olahanDaging:"Kandungan bahan pengawet nitrat/nitrit dapat berubah menjadi senyawa nitrosamin (zat hasil pengawetan yang bersifat merusak sel) di dalam tubuh. Senyawa ini memicu stres oksidatif (kerusakan sel akibat kelebihan radikal bebas) dan berpotensi merusak struktur DNA sperma.",
+  gula:"Gula rafinasi (gula olahan/putih) dan/atau HFCS atau sirup jagung tinggi fruktosa (pemanis buatan yang sering dipakai di minuman/makanan kemasan) memicu lonjakan gula darah dan insulin berulang kali. Ini berkaitan dengan resistensi insulin (tubuh kurang peka terhadap insulin) yang mendasari gangguan ovulasi pada kondisi seperti PCOS (gangguan hormon pada indung telur).",
+  natrium:"Kandungan natrium/garam serta penyedap rasa (MSG) yang tinggi, ditambah potensi paparan BPA (zat kimia dari kemasan plastik/kaleng), berasosiasi dengan stres oksidatif ringan (kerusakan sel akibat radikal bebas) bila dikonsumsi rutin dalam jumlah besar.",
   proteinSehat:"Sumber protein/lemak sehat yang mendukung keseimbangan hormon reproduksi serta kualitas sel telur maupun sperma.",
-  sayur:"Kaya folat, serat, dan antioksidan yang mendukung kematangan sel telur dan menekan stres oksidatif dalam tubuh.",
-  buah:"Kaya vitamin, mineral, dan antioksidan alami yang mendukung kesehatan reproduksi secara umum.",
-  santan:"Santan kental yang dimasak lama melepaskan lemak jenuh dalam jumlah besar, meningkatkan kolesterol LDL dan berkontribusi pada peradangan pembuluh darah yang menghambat aliran darah ke organ reproduksi.",
-  lemakDaging:"Bagian daging berlemak tinggi mengandung lemak jenuh yang, bila rutin dikonsumsi dalam porsi besar, berkaitan dengan peningkatan kolesterol LDL dan gangguan aliran darah mikro ke jaringan reproduksi.",
+  sayur:"Kaya folat (vitamin B penting untuk pembelahan sel), serat, dan antioksidan (zat pelindung sel dari kerusakan) yang mendukung kematangan sel telur dan menekan stres oksidatif dalam tubuh.",
+  buah:"Kaya vitamin, mineral, dan antioksidan alami (zat pelindung sel dari kerusakan) yang mendukung kesehatan reproduksi secara umum.",
+  santan:"Santan kental yang dimasak lama melepaskan lemak jenuh dalam jumlah besar, meningkatkan kolesterol LDL (kolesterol jahat yang menumpuk di dinding pembuluh darah) dan berkontribusi pada peradangan pembuluh darah yang menghambat aliran darah ke organ reproduksi.",
+  lemakDaging:"Bagian daging berlemak tinggi mengandung lemak jenuh yang, bila rutin dikonsumsi dalam porsi besar, berkaitan dengan peningkatan kolesterol LDL (kolesterol jahat) dan gangguan aliran darah mikro (aliran darah di pembuluh-pembuluh terkecil) ke jaringan reproduksi.",
   netral:"Tanpa tambahan gula, garam, atau lemak berlebih, minuman/makanan ini relatif netral dan tidak banyak membebani keseimbangan hormon reproduksi maupun pembuluh darah."
 };
 const AL = {
@@ -1080,6 +1108,13 @@ function foodEmoji(food){
   for(const [keys,emo] of FOOD_EMOJI_MAP){ if(keys.some(k=>hay.includes(k))) return emo; }
   return {ekstrem:'🍟',tinggi:'🍜',sedang:'🍲',rendah:'🥗'}[food.cat]||'🍽️';
 }
+// CATATAN TEKNIS: model AR (coco-ssd) hanya mengenali 90 kelas objek COCO bawaan, dan dari situ hanya
+// segelintir yang berupa makanan: banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza,
+// donut, cake. Entri FOOD_DB dengan cocoLabel di luar daftar ini (mis. "rice", "chicken", "salad",
+// "soup") TIDAK PERNAH bisa terdeteksi otomatis oleh AR -- ini batasan model, bukan bug -- sehingga
+// makanan tersebut hanya bisa dianalisis lewat pencarian manual. Menambah kategori AR yang benar-benar
+// baru (di luar 10 kelas ini) memerlukan model deteksi objek kustom yang dilatih ulang untuk makanan
+// Indonesia, bukan sekadar konfigurasi ulang coco-ssd.
 const COCO_TO_DB = {}; FOOD_DB.forEach(f=>{ if(f.cocoLabel) COCO_TO_DB[f.cocoLabel]=f; });
 
 const DAMPAK = {
@@ -1098,7 +1133,7 @@ const DAMPAK = {
 };
 
 let mediaStream=null, lastCapturedDataUrl=null, selectedFood=null, history=[];
-let cocoModel=null, detectLoopId=null, currentDetection=null;
+let cocoModel=null, detectLoopId=null, currentDetection=null, stableClass=null, stableCount=0;
 let currentFacing='environment', flashOn=false, torchSupported=null;
 
 /* ---------- Nav ---------- */
@@ -1108,7 +1143,14 @@ function showTab(tab){
     document.getElementById('screen-'+s).classList.toggle('active', s===tab);
   });
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  if(tab==='scan') startCameraFlow(); else stopDetectLoop();
+  if(tab==='scan'){
+    startCameraFlow();
+    // Panduan Cara Menggunakan Scan otomatis ditampilkan sekali untuk pengguna baru
+    if(!localStorage.getItem('nutrirepro_scan_tips_seen')){
+      localStorage.setItem('nutrirepro_scan_tips_seen','1');
+      setTimeout(()=> document.getElementById('scanTipsOverlay').classList.add('show'), 250);
+    }
+  } else stopDetectLoop();
   if(tab==='home') renderHome();
   if(tab==='edu'){ renderEdu(); initVascular3D(); }
   if(tab==='artikel') renderArtikel();
@@ -1152,8 +1194,9 @@ function renderHome(){
 }
 function renderEdu(){
   const topics=[
-    {t:"Apa itu PCOS?", b:"Polycystic Ovary Syndrome (PCOS) adalah gangguan hormon yang umum pada usia reproduktif, sering berkaitan dengan resistensi insulin. Pola makan rendah gula rafinasi dan lemak trans dapat membantu mengelola gejalanya.", q:"resistensi insulin"},
-    {t:"Peran Antioksidan bagi Kesuburan", b:"Antioksidan seperti vitamin C, E, dan zinc membantu melindungi sel telur dan sperma dari kerusakan akibat stres oksidatif, yang dapat dipicu oleh polusi, rokok, dan makanan olahan.", q:"antioksidan"},
+    {t:"Manfaat Menghindari/Mengurangi Fast Food", b:"Penelitian pada 5.598 wanita (Human Reproduction, 2018) menemukan bahwa yang jarang/tidak makan fast food memiliki waktu tunggu hamil hingga 24% lebih singkat dan risiko infertilitas lebih rendah dibanding yang makan fast food &ge;4x/minggu. Studi lain (2020) juga mengaitkan seringnya makan makanan siap saji dengan peningkatan risiko infertilitas pada wanita. Secara umum, mengurangi fast food membantu: (1) menjaga elastisitas pembuluh darah (endotel) tetap baik, (2) menurunkan paparan lemak jenuh, natrium, dan bahan kemasan (mis. BPA/ftalat) yang berkaitan dengan gangguan hormon, (3) menstabilkan gula darah &amp; berat badan, serta (4) mendukung kualitas sel telur dan sperma dalam jangka panjang.", q:"fast food"},
+    {t:"Apa itu PCOS?", b:"Polycystic Ovary Syndrome atau PCOS (sindrom ovarium polikistik) adalah gangguan hormon yang umum pada usia reproduktif, sering berkaitan dengan resistensi insulin (tubuh kurang peka terhadap insulin sehingga gula darah sulit terkontrol). Pola makan rendah gula rafinasi (gula olahan) dan lemak trans (lemak hasil olahan) dapat membantu mengelola gejalanya.", q:"resistensi insulin"},
+    {t:"Peran Antioksidan bagi Kesuburan", b:"Antioksidan (zat pelindung sel dari kerusakan) seperti vitamin C, E, dan zinc membantu melindungi sel telur dan sperma dari kerusakan akibat stres oksidatif (kerusakan sel akibat radikal bebas berlebih), yang dapat dipicu oleh polusi, rokok, dan makanan olahan.", q:"antioksidan"},
     {t:"Makanan Penurun Kualitas Sperma", b:"Daging olahan, makanan tinggi lemak trans, produk kedelai, dan produk susu tinggi lemak dikaitkan dengan penurunan jumlah serta motilitas sperma. Pola makan ini sejalan dengan mekanisme yang sama: peradangan pembuluh darah akibat lemak jenuh & pengawet turut menghambat aliran darah ke organ reproduksi pria.", q:"kualitas sperma"},
     {t:"Makanan Pemicu Batu Ginjal", b:"Konsumsi garam, protein hewani, dan gula berlebih dapat meningkatkan kadar mineral dalam urine yang memicu terbentuknya kristal batu ginjal. Karena ginjal juga bagian dari jalur vaskular yang sama dengan organ reproduksi, menjaga asupan natrium tetap penting untuk kesehatan keduanya.", q:"batu ginjal"},
     {t:"Jalur Pembuluh Darah: Dari Piring ke Organ Reproduksi", b:"Natrium dan lemak jenuh berlebih dapat mengganggu lapisan dalam pembuluh darah (endotel) sehingga elastisitasnya berkurang. Karena ginjal, kandung kemih, dan organ reproduksi sangat bergantung pada aliran darah mikro yang lancar, gangguan pada endotel ini ikut menghambat suplai oksigen &amp; nutrisi ke jaringan tersebut &mdash; inilah dasar dari animasi di bagian atas halaman ini.", q:"endotel"},
@@ -1239,6 +1282,20 @@ const ARTIKEL_DATA=[
   kw:['batu ginjal','garam','minuman bersoda','makanan kaleng','gula','karbohidrat','ginjal']
 },
   {
+    cat:'Kesuburan Wanita',
+    title:'Pre-pregnancy Fast Food and Fruit Intake Is Associated With Time to Pregnancy',
+    desc:'Studi kohort pada 5.598 wanita (Grieger dkk., Human Reproduction, 2018) menemukan bahwa wanita yang tidak mengonsumsi fast food memiliki risiko infertilitas 41% lebih rendah dibanding yang mengonsumsi fast food &ge;4 kali/minggu, sementara asupan buah yang cukup mempercepat waktu untuk hamil.',
+    href:'https://doi.org/10.1093/humrep/dey079', source:'Human Reproduction (Oxford Academic)',
+    kw:['fast food','kesuburan wanita','waktu hamil','infertilitas','buah','preconception']
+  },
+  {
+    cat:'Kesuburan Wanita',
+    title:'Association Between the Frequency of Eating Non-home-prepared Meals and Women Infertility',
+    desc:'Analisis data NHANES AS (Lee dkk., 2020) pada 2.143 wanita usia 20&ndash;49 tahun menemukan bahwa semakin sering makan makanan siap saji/tidak dimasak sendiri (termasuk fast food), semakin tinggi pula risiko infertilitas yang dilaporkan sendiri oleh responden.',
+    href:'https://pmc.ncbi.nlm.nih.gov/articles/PMC7142005/', source:'PMC',
+    kw:['fast food','makanan siap saji','infertilitas','kesuburan wanita','pola makan']
+  },
+  {
     cat:'Intervensi Diet',
     title:'Effects of Mediterranean Diet on Endothelial Reactivity',
     desc:'Uji klinis acak menunjukkan bahwa pola makan Mediterania, yang kaya sayuran, ikan, dan minyak zaitun, memperbaiki fungsi pelebaran pembuluh darah dibandingkan dengan diet kontrol dalam waktu 8 minggu. Temuan ini mendukung pola makan sehat sebagai strategi nutrisi untuk menjaga kesehatan pembuluh darah.',
@@ -1315,7 +1372,28 @@ const video=document.getElementById('video'), viewfinder=document.getElementById
 const overlayCanvas=document.getElementById('overlayCanvas'), hiddenCanvas=document.getElementById('hiddenCanvas');
 const arPill=document.getElementById('arPill'), arPillText=document.getElementById('arPillText');
 const detectChip=document.getElementById('detectChip');
+const btnToggle2D=document.getElementById('btnToggle2D');
 let cameraStarted=false, modelLoadStarted=false;
+// Mode 2D: matikan deteksi otomatis (AR) sepenuhnya -> lebih ringan untuk perangkat/kamera yang kurang memadai
+// atau koneksi internet yang lambat. Preferensi disimpan supaya tidak perlu diatur ulang tiap sesi.
+let ar2DMode = localStorage.getItem('nutrirepro_2d_mode')==='1';
+function applyAr2DModeUI(){
+  btnToggle2D.classList.toggle('active', ar2DMode);
+  btnToggle2D.textContent = ar2DMode ? 'Mode AR' : 'Mode 2D';
+  document.querySelector('.vf-frame').style.display = ar2DMode ? 'none' : '';
+  overlayCanvas.style.display = ar2DMode ? 'none' : '';
+  if(ar2DMode){
+    stopDetectLoop();
+    arPill.className='ar-pill off'; arPillText.textContent='Mode 2D Aktif (AR nonaktif)';
+  }
+}
+btnToggle2D.addEventListener('click', ()=>{
+  ar2DMode = !ar2DMode;
+  localStorage.setItem('nutrirepro_2d_mode', ar2DMode?'1':'0');
+  applyAr2DModeUI();
+  if(!ar2DMode && mediaStream) loadCocoModel();
+});
+applyAr2DModeUI();
 
 function showVfToast(msg, ms=2200){
   const t=document.getElementById('vfToast'); if(!t) return;
@@ -1335,6 +1413,14 @@ async function startCameraFlow(facing){
   try{
     mediaStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:currentFacing}, audio:false });
     video.srcObject = mediaStream;
+    // Kamera dengan resolusi sangat rendah membuat deteksi otomatis kurang akurat. Beri tahu
+    // pengguna sekali saja supaya tahu bahwa pencarian manual akan memberi hasil yang lebih andal.
+    const track=mediaStream.getVideoTracks()[0];
+    const settings = track && track.getSettings ? track.getSettings() : {};
+    if(settings.width && settings.width<480 && localStorage.getItem('nutrirepro_lowres_warned')!=='1'){
+      localStorage.setItem('nutrirepro_lowres_warned','1');
+      showVfToast('Resolusi kamera perangkat ini rendah. Untuk hasil terbaik, gunakan pencarian manual.', 3200);
+    }
   }catch(err){
     if(currentFacing==='user' && facing){
       showVfToast('Kamera depan tidak tersedia, kembali ke kamera belakang');
@@ -1345,7 +1431,8 @@ async function startCameraFlow(facing){
     arPill.className='ar-pill off'; arPillText.textContent='Kamera Tidak Tersedia';
     return;
   }
-  loadCocoModel();
+  if(!ar2DMode) loadCocoModel();
+  else applyAr2DModeUI();
 }
 document.getElementById('btnSwitchCam').addEventListener('click', ()=>{
   startCameraFlow(currentFacing==='environment' ? 'user' : 'environment');
@@ -1383,31 +1470,52 @@ document.getElementById('galleryInput').addEventListener('change', (e)=>{
   e.target.value='';
 });
 async function loadCocoModel(){
+  if(ar2DMode) return;
   if(cocoModel){ startDetectLoop(); return; }
   if(modelLoadStarted) return;
   modelLoadStarted=true;
+  arPill.className='ar-pill loading'; arPillText.textContent='Memuat AR&hellip;';
   try{
-    cocoModel = await cocoSsd.load();
+    await loadArLibs();
+    // base 'lite_mobilenet_v2' dipilih khusus karena ukurannya jauh lebih kecil & lebih cepat
+    // dibanding base default ('mobilenet_v2'), sehingga loading tidak lag/lambat di jaringan
+    // atau ponsel dengan spesifikasi standar.
+    cocoModel = await cocoSsd.load({ base:'lite_mobilenet_v2' });
     arPill.className='ar-pill'; arPillText.textContent='AR Aktif';
     startDetectLoop();
   }catch(e){
+    modelLoadStarted=false;
     arPill.className='ar-pill off'; arPillText.textContent='Mode Manual (AR gagal dimuat)';
   }
 }
+// Deteksi di-throttle (dijalankan tiap ~280ms, bukan tiap frame) supaya tidak membebani CPU/GPU
+// perangkat standar -- ini mengurangi lag pada proses loading & saat AR berjalan.
+const DETECT_INTERVAL_MS = 280;
+let slowFrameCount=0, perfWarned=(localStorage.getItem('nutrirepro_perf_warned')==='1');
 function startDetectLoop(){
   if(detectLoopId) return;
   const loop = async ()=>{
-    if(video.readyState===4 && cocoModel){
+    const t0 = performance.now();
+    if(video.readyState===4 && cocoModel && !ar2DMode){
       try{
         const preds = await cocoModel.detect(video);
         drawPredictions(preds);
       }catch(e){}
     }
-    detectLoopId = requestAnimationFrame(loop);
+    const elapsed = performance.now()-t0;
+    // Jika satu siklus deteksi konsisten memakan waktu lama (indikasi kamera/perangkat kurang
+    // memadai), tawarkan Mode 2D satu kali supaya Scan tetap lancar dan hasil analisis nutrisi
+    // (bukan hasil deteksi visual) tetap akurat lewat pencarian manual.
+    if(elapsed>600) slowFrameCount++; else slowFrameCount=Math.max(0,slowFrameCount-1);
+    if(slowFrameCount>=6 && !perfWarned && !ar2DMode){
+      perfWarned=true; localStorage.setItem('nutrirepro_perf_warned','1');
+      showVfToast('Deteksi terasa berat di perangkat ini. Coba Mode 2D untuk performa lebih ringan.', 3200);
+    }
+    detectLoopId = setTimeout(loop, Math.max(0, DETECT_INTERVAL_MS-elapsed));
   };
-  detectLoopId = requestAnimationFrame(loop);
+  detectLoopId = setTimeout(loop, DETECT_INTERVAL_MS);
 }
-function stopDetectLoop(){ if(detectLoopId){ cancelAnimationFrame(detectLoopId); detectLoopId=null; } detectChip.classList.remove('show'); currentDetection=null; }
+function stopDetectLoop(){ if(detectLoopId){ clearTimeout(detectLoopId); detectLoopId=null; } detectChip.classList.remove('show'); currentDetection=null; stableClass=null; stableCount=0; }
 
 function drawPredictions(preds){
   const cw = overlayCanvas.clientWidth, ch = overlayCanvas.clientHeight;
@@ -1419,9 +1527,11 @@ function drawPredictions(preds){
   if(!vw||!vh) return;
   const scale = Math.min(cw/vw, ch/vh);
   const offX=(cw-vw*scale)/2, offY=(ch-vh*scale)/2;
+  // Ambang kepercayaan dinaikkan dari 0.55 -> 0.62 untuk mengurangi kesalahan kategori pada
+  // objek yang mirip (mis. donat vs kue) yang sebelumnya sering terdeteksi dengan skor rendah.
   let best=null;
   preds.forEach(p=>{
-    if(!COCO_TO_DB[p.class] || p.score<0.55) return;
+    if(!COCO_TO_DB[p.class] || p.score<0.62) return;
     if(!best || p.score>best.score) best=p;
     const [x,y,w,h]=p.bbox;
     const rx=x*scale+offX, ry=y*scale+offY, rw=w*scale, rh=h*scale;
@@ -1432,11 +1542,18 @@ function drawPredictions(preds){
     ctx.fillStyle='rgba(20,71,44,0.9)'; ctx.fillRect(rx, Math.max(0,ry-22), tw, 20);
     ctx.fillStyle='#fff'; ctx.fillText(label, rx+7, Math.max(14,ry-7));
   });
+  // Stabilisasi: sebuah kategori baru dianggap valid & ditampilkan sebagai chip hanya setelah
+  // terdeteksi konsisten pada 2 pemeriksaan berturut-turut. Ini mencegah chip "meloncat-loncat"
+  // ke kategori yang salah akibat satu frame yang keliru/blur (mis. gerakan kamera).
   if(best){
-    currentDetection = COCO_TO_DB[best.class];
-    detectChip.innerHTML = `&#128269; Terdeteksi: ${currentDetection.name} &mdash; Ketuk untuk analisis`;
-    detectChip.classList.add('show');
+    if(stableClass===best.class){ stableCount++; } else { stableClass=best.class; stableCount=1; }
+    if(stableCount>=2){
+      currentDetection = COCO_TO_DB[best.class];
+      detectChip.innerHTML = `&#128269; Terdeteksi (perkiraan): ${currentDetection.name} &mdash; Ketuk untuk konfirmasi`;
+      detectChip.classList.add('show');
+    }
   }else{
+    stableClass=null; stableCount=0;
     currentDetection=null;
     detectChip.classList.remove('show');
   }
